@@ -349,32 +349,49 @@ textarea:disabled {
 /* Mobile-first responsive breakpoints */
 @media (max-width: 480px) {
   :root {
-    font-size: 14px;
+    font-size: 15px; /* Slightly larger for better readability */
+  }
+  
+  body {
+    min-width: 320px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
   }
   
   h1 {
     font-size: 2rem;
+    line-height: 1.2;
   }
   
   h2 {
     font-size: 1.75rem;
+    line-height: 1.3;
   }
   
   h3 {
     font-size: 1.25rem;
+    line-height: 1.3;
   }
   
   button {
     padding: var(--space-md) var(--space-lg);
     font-size: 1rem;
-    min-height: 44px; /* Touch target size */
+    min-height: 48px; /* Larger touch target size for mobile */
+    min-width: 48px;
+    touch-action: manipulation; /* Improve touch responsiveness */
   }
   
   input,
   select,
   textarea {
     font-size: 16px; /* Prevent zoom on iOS */
-    min-height: 44px;
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+  
+  /* Improve scrolling on mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
   }
 }
 

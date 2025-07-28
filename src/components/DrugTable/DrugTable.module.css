@@ -171,23 +171,72 @@
   .tableContainer {
     margin: 0.5rem 0;
     border-radius: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   }
   
-
+  .tableWrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   
   .table {
-    min-width: 900px;
+    min-width: 700px; /* Reduced from 900px for better mobile experience */
+    font-size: 0.85rem;
+  }
+  
+  .headerCell,
+  .tableCell {
+    padding: 0.75rem 0.5rem;
+    min-width: 80px; /* Ensure minimum touch target */
+  }
+  
+  .headerCell {
+    font-size: 0.8rem;
+    padding: 0.875rem 0.5rem;
+    line-height: 1.2;
+  }
+  
+  .cellContent {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  .priceCell {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+}
+
+/* Alternative Mobile Layout (Card View) - Very Small Screens */
+@media (max-width: 480px) {
+  .tableContainer {
+    margin: 0.25rem 0;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .tableWrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1rem; /* Space for scrollbar */
+  }
+  
+  .table {
+    min-width: 600px; /* Further reduced for very small screens */
     font-size: 0.8rem;
   }
   
   .headerCell,
   .tableCell {
-    padding: 0.625rem 0.375rem;
+    padding: 0.5rem 0.375rem;
+    min-width: 70px;
   }
   
   .headerCell {
     font-size: 0.75rem;
-    padding: 0.75rem 0.375rem;
+    padding: 0.625rem 0.375rem;
+    line-height: 1.1;
   }
   
   .cellContent {
@@ -197,23 +246,7 @@
   
   .priceCell {
     font-size: 0.8rem;
-  }
-}
-
-/* Alternative Mobile Layout (Card View) - Very Small Screens */
-@media (max-width: 480px) {
-  .tableContainer {
-    box-shadow: none;
-    background: transparent;
-  }
-  
-  .tableWrapper {
-    overflow-x: auto;
-    max-height: none;
-  }
-  
-  .table {
-    min-width: 800px;
+    font-weight: 600;
   }
   
   /* Card view alternative for very small screens */

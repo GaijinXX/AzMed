@@ -130,46 +130,67 @@
 @media (max-width: 768px) {
   .searchContainer {
     margin: 0 auto 1.5rem;
+    max-width: 100%;
+    padding: 0 var(--space-sm);
   }
   
   .searchInput {
-    padding: 10px 12px;
+    padding: 12px 16px;
     font-size: 16px; /* Prevent zoom on iOS */
+    min-height: 44px; /* Better touch target */
   }
   
   .clearButton {
-    padding: 6px 10px;
-    margin-right: 2px;
-  }
-  
-  .searchButton {
-    padding: 10px 12px;
+    padding: 8px 12px;
+    margin-right: 4px;
+    min-height: 44px;
     min-width: 44px;
   }
   
+  .searchButton {
+    padding: 12px 16px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
   .loadingIndicator {
-    padding: 6px 12px;
-    font-size: 13px;
+    padding: 8px 16px;
+    font-size: 14px;
   }
 }
 
 @media (max-width: 480px) {
+  .searchContainer {
+    margin: 0 auto 1rem;
+    padding: 0 var(--space-xs);
+  }
+  
   .searchInput {
-    padding: 8px 10px;
+    padding: 14px 16px;
+    font-size: 16px;
+    min-height: 48px; /* Larger touch target for very small screens */
   }
   
   .searchInput::placeholder {
-    font-size: 14px;
+    font-size: 15px;
   }
   
   .clearButton {
-    padding: 4px 8px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 16px;
+    min-height: 48px;
+    min-width: 48px;
   }
   
   .searchButton {
-    padding: 8px 10px;
-    min-width: 40px;
+    padding: 14px 16px;
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 16px;
+  }
+  
+  .loadingIndicator {
+    padding: 10px 16px;
     font-size: 14px;
   }
 }

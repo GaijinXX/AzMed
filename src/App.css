@@ -296,24 +296,29 @@
 /* Responsive design */
 @media (max-width: 480px) {
   .App {
-    padding: var(--space-sm);
+    padding: var(--space-xs);
+    max-width: 100%;
   }
   
   .App-header {
     padding: var(--space-sm);
     margin-bottom: var(--space-md);
+    border-radius: var(--radius-md);
   }
   
   .App-header h1 {
     font-size: 1.5rem;
+    line-height: 1.3;
   }
   
   .App-header p {
     font-size: 0.9rem;
+    line-height: 1.4;
   }
   
   .error-boundary {
-    padding: var(--space-lg);
+    padding: var(--space-md);
+    margin: var(--space-xs);
   }
   
   .error-boundary h2 {
@@ -321,8 +326,8 @@
   }
   
   .loading-content {
-    margin: var(--space-md);
-    padding: var(--space-lg);
+    margin: var(--space-sm);
+    padding: var(--space-md);
   }
 }
 
@@ -427,16 +432,21 @@
   
   .results-header > :last-child {
     align-self: flex-end;
+    width: auto;
   }
 }
 
 @media (max-width: 480px) {
   .results-header {
-    gap: var(--space-xs);
+    gap: var(--space-sm);
+    padding: 0 var(--space-xs);
   }
   
   .results-header > :last-child {
-    align-self: stretch;
+    align-self: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 }
 
