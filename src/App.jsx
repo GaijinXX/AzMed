@@ -444,27 +444,11 @@ function App() {
                   }
                   action={
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                      {optimisticState.searchText && optimisticState.searchText !== '%' && (
-                        <button 
-                          onClick={() => handleSearch('%')}
-                          className="retry-button"
-                        >
-                          Show All Drugs
-                        </button>
-                      )}
                       <button 
                         onClick={() => handleSearch('%')}
                         className="retry-button"
-                        style={{ backgroundColor: '#2563eb' }}
                       >
-                        Browse All Drugs
-                      </button>
-                      <button 
-                        onClick={() => handleSearch('a')}
-                        className="retry-button"
-                        style={{ backgroundColor: '#059669' }}
-                      >
-                        Show Popular Drugs
+                        Show All Drugs
                       </button>
                     </div>
                   }
