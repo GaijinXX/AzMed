@@ -1,0 +1,88 @@
+.resultsInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.countText {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.pageRange {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.loadingText {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.noResults {
+  color: var(--color-error);
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .resultsInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+  }
+  
+  .pageRange {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .resultsInfo {
+    padding: 0.5rem 0;
+    font-size: 0.8rem;
+  }
+  
+  .pageRange {
+    font-size: 0.75rem;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .resultsInfo {
+    color: var(--color-text-secondary);
+  }
+  
+  .countText {
+    color: var(--color-text-primary);
+  }
+  
+  .pageRange {
+    color: var(--color-text-secondary);
+  }
+  
+  .loadingText {
+    color: var(--color-text-secondary);
+  }
+  
+  .noResults {
+    color: var(--color-error);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .countText {
+    color: var(--color-text-primary);
+  }
+  
+  .noResults {
+    color: var(--color-error);
+    font-weight: 600;
+  }
+}

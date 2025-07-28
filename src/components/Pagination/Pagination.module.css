@@ -1,0 +1,388 @@
+/* Pagination Component Styles */
+.paginationContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--color-border-primary);
+  margin-top: 2rem;
+  position: relative;
+}
+
+.pageSizeSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.pageSizeLabel {
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--color-text-primary);
+}
+
+.pageSizeForm {
+  display: inline-block;
+}
+
+.pageSizeSelect {
+  padding: 6px 8px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: 4px;
+  background: var(--color-bg-primary);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-width: 60px;
+}
+
+.pageSizeSelect:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+.pageSizeSelect:disabled {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-align: center;
+}
+
+.pageNavigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.navButton {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navButton:hover:not(:disabled) {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.navButton:disabled {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  border-color: var(--color-border-primary);
+}
+
+.prevButton {
+  margin-right: 0.5rem;
+}
+
+.nextButton {
+  margin-left: 0.5rem;
+}
+
+.pageNumbers {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pageForm {
+  display: inline-block;
+}
+
+.pageButton {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pageButton:hover:not(:disabled) {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.pageButton:disabled {
+  cursor: not-allowed;
+}
+
+.currentPage {
+  background: var(--color-primary) !important;
+  color: white !important;
+  border-color: var(--color-primary) !important;
+  font-weight: 600;
+}
+
+.currentPage:hover {
+  background: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+}
+
+.ellipsis {
+  padding: 8px 4px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  user-select: none;
+}
+
+.loadingIndicator {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 8px 16px;
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--color-primary);
+  z-index: 10;
+  margin-top: 0.5rem;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  font-size: 16px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .paginationContainer {
+    gap: 0.75rem;
+    padding: 1rem 0;
+  }
+
+  .pageNavigation {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .pageNumbers {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .prevButton,
+  .nextButton {
+    order: 2;
+    margin: 0;
+    flex: 1;
+    max-width: 120px;
+  }
+
+  .navButton {
+    min-width: 70px;
+    padding: 10px 12px;
+  }
+
+  .pageButton {
+    min-width: 44px;
+    padding: 10px 12px;
+  }
+
+  .pageSizeSection {
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+
+  .pageInfo {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .paginationContainer {
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+  }
+
+  .pageNumbers {
+    gap: 0.125rem;
+  }
+
+  .pageButton {
+    min-width: 36px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .navButton {
+    min-width: 60px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .ellipsis {
+    padding: 8px 2px;
+    font-size: 13px;
+  }
+
+  .pageSizeSelect {
+    padding: 8px 6px;
+    font-size: 13px;
+  }
+
+  .pageInfo {
+    font-size: 12px;
+  }
+
+  .loadingIndicator {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .navButton,
+  .pageButton {
+    border-width: 2px;
+  }
+
+  .currentPage {
+    background: #000 !important;
+    border-color: #000 !important;
+  }
+
+  .navButton:hover:not(:disabled),
+  .pageButton:hover:not(:disabled) {
+    border-color: #000;
+    color: #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+
+  .navButton,
+  .pageButton,
+  .pageSizeSelect {
+    transition: none;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .paginationContainer {
+    border-top-color: var(--color-border-primary);
+  }
+  
+  .pageSizeSection {
+    color: var(--color-text-secondary);
+  }
+  
+  .pageSizeLabel {
+    color: var(--color-text-primary);
+  }
+  
+  .pageSizeSelect {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-primary);
+  }
+  
+  .pageSizeSelect:disabled {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-muted);
+  }
+  
+  .pageInfo {
+    color: var(--color-text-secondary);
+  }
+  
+  .navButton,
+  .pageButton {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-primary);
+  }
+  
+  .navButton:hover:not(:disabled),
+  .pageButton:hover:not(:disabled) {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+  
+  .navButton:disabled {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-muted);
+  }
+  
+  .ellipsis {
+    color: var(--color-text-muted);
+  }
+  
+  .loadingIndicator {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-primary);
+    color: var(--color-primary);
+  }
+}
+
+/* Focus styles for accessibility */
+.navButton:focus,
+.pageButton:focus,
+.pageSizeSelect:focus {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .paginationContainer {
+    display: none;
+  }
+}

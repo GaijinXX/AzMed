@@ -1,0 +1,426 @@
+/* Table Container */
+.tableContainer {
+  width: 100%;
+  margin: 1rem 0;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  background: var(--color-bg-primary);
+  overflow: hidden;
+  border: 1px solid var(--color-border-primary);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  position: relative;
+}
+
+/* Table Styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  min-width: 1200px; /* Ensures horizontal scroll on smaller screens */
+  background: var(--color-bg-primary);
+}
+
+/* Table Header */
+.tableHeader {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #4f46e5 100%);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerCell {
+  padding: 1rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  color: white;
+}
+
+.headerCell:last-child {
+  border-right: none;
+}
+
+/* Table Body */
+.tableBody {
+  background: var(--color-bg-primary);
+}
+
+.tableBody.pending {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--color-border-primary);
+  transition: background-color 0.15s ease;
+  background: var(--color-bg-primary);
+}
+
+.tableRow:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+/* Table Cells */
+.tableCell {
+  padding: 0.875rem 0.75rem;
+  vertical-align: top;
+  border-right: 1px solid var(--color-border-primary);
+  position: relative;
+  color: var(--color-text-primary);
+  background: inherit;
+}
+
+.tableCell:last-child {
+  border-right: none;
+}
+
+.cellContent {
+  display: block;
+  word-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+
+.priceCell {
+  font-weight: 600;
+  color: var(--color-success);
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-primary);
+}
+
+.emptyState p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Loading Skeleton */
+.skeletonRow {
+  border-bottom: 1px solid var(--color-border-primary);
+  background: var(--color-bg-primary);
+}
+
+.skeletonCell {
+  padding: 0.875rem 0.75rem;
+  border-right: 1px solid var(--color-border-primary);
+}
+
+.skeletonCell:last-child {
+  border-right: none;
+}
+
+.skeletonContent {
+  height: 1.2rem;
+  background: linear-gradient(90deg, var(--color-bg-secondary) 25%, var(--color-bg-tertiary) 50%, var(--color-bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive Design - Tablet */
+@media (max-width: 1024px) {
+  .table {
+    min-width: 1000px;
+  }
+  
+  .headerCell,
+  .tableCell {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .headerCell {
+    font-size: 0.8rem;
+  }
+}
+
+/* Responsive Design - Mobile */
+@media (max-width: 768px) {
+  .tableContainer {
+    margin: 0.5rem 0;
+    border-radius: 6px;
+  }
+  
+
+  
+  .table {
+    min-width: 900px;
+    font-size: 0.8rem;
+  }
+  
+  .headerCell,
+  .tableCell {
+    padding: 0.625rem 0.375rem;
+  }
+  
+  .headerCell {
+    font-size: 0.75rem;
+    padding: 0.75rem 0.375rem;
+  }
+  
+  .cellContent {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  
+  .priceCell {
+    font-size: 0.8rem;
+  }
+}
+
+/* Alternative Mobile Layout (Card View) - Very Small Screens */
+@media (max-width: 480px) {
+  .tableContainer {
+    box-shadow: none;
+    background: transparent;
+  }
+  
+  .tableWrapper {
+    overflow-x: auto;
+    max-height: none;
+  }
+  
+  .table {
+    min-width: 800px;
+  }
+  
+  /* Card view alternative for very small screens */
+  .cardView {
+    display: none; /* Will be enabled via JavaScript for very small screens */
+  }
+  
+  .drugCard {
+    background: var(--color-bg-primary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border-primary);
+  }
+  
+  .cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border-primary);
+  }
+  
+  .cardTitle {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    line-height: 1.4;
+    flex: 1;
+    margin-right: 0.5rem;
+  }
+  
+  .cardRegNumber {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  
+  .cardBody {
+    display: grid;
+    gap: 0.5rem;
+  }
+  
+  .cardField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+  
+  .cardLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+  
+  .cardValue {
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+  }
+  
+  .cardPrices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border-primary);
+  }
+  
+  .cardPrice {
+    text-align: center;
+    padding: 0.5rem;
+    background: var(--color-bg-secondary);
+    border-radius: 6px;
+  }
+  
+  .cardPrice .cardLabel {
+    margin-bottom: 0.25rem;
+  }
+  
+  .cardPrice .cardValue {
+    font-weight: 600;
+    color: var(--color-success);
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+    font-size: 1rem;
+  }
+  
+  .emptyState {
+    padding: 2rem 0.5rem;
+    margin: 0.5rem;
+  }
+  
+  .emptyState p {
+    font-size: 1rem;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .tableContainer {
+    background: var(--color-bg-primary);
+    border-color: var(--color-border-primary);
+  }
+  
+  .table {
+    background: var(--color-bg-primary);
+  }
+  
+  .tableBody {
+    background: var(--color-bg-primary);
+  }
+  
+  .tableRow {
+    background: var(--color-bg-primary);
+    border-bottom-color: var(--color-border-primary);
+  }
+  
+  .tableRow:hover {
+    background-color: var(--color-bg-secondary);
+  }
+  
+  .tableCell {
+    color: var(--color-text-primary);
+    border-right-color: var(--color-border-primary);
+  }
+  
+  .cellContent {
+    color: var(--color-text-primary);
+  }
+  
+  .emptyState {
+    background: var(--color-bg-primary);
+    color: var(--color-text-secondary);
+    border-color: var(--color-border-primary);
+  }
+  
+  .skeletonRow {
+    background: var(--color-bg-primary);
+    border-bottom-color: var(--color-border-primary);
+  }
+  
+  .skeletonCell {
+    border-right-color: var(--color-border-primary);
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .tableHeader {
+    background: #000;
+    color: #fff;
+  }
+  
+  .tableRow:hover {
+    background-color: var(--color-bg-secondary);
+  }
+  
+  .tableCell {
+    border-right-color: var(--color-border-secondary);
+  }
+  
+  .tableRow {
+    border-bottom-color: var(--color-border-secondary);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .tableRow,
+  .tableBody.pending,
+  .skeletonContent {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .tableContainer {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .tableHeader {
+    background: #000 !important;
+    color: #fff !important;
+  }
+  
+  .tableRow:hover {
+    background-color: transparent;
+  }
+  
+  .table {
+    min-width: auto;
+    font-size: 0.7rem;
+  }
+  
+  .headerCell,
+  .tableCell {
+    padding: 0.25rem;
+  }
+}
