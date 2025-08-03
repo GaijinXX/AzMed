@@ -9,10 +9,10 @@ export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Debug function for testing Supabase function directly (available in browser console)
 window.testSupabaseFunction = async (
-  searchTerm = '%', 
-  pageNumber = 1, 
-  pageSize = 10, 
-  orderBy = null, 
+  searchTerm = '%',
+  pageNumber = 1,
+  pageSize = 10,
+  orderBy = null,
   orderDirection = 'asc'
 ) => {
   console.log('🧪 Testing Supabase function directly...')
@@ -119,8 +119,8 @@ const parseApiResponse = (response, searchTerm = '', pageNumber = 1, pageSize = 
     totalPages = Math.ceil(totalCount / currentPageSize)
   }
   // Case 2: Legacy format - response.data is array of objects with {data: drugData, total_count: number}
-  else if (response.data && Array.isArray(response.data) && response.data.length > 0 && 
-      response.data[0].data && typeof response.data[0].total_count === 'number') {
+  else if (response.data && Array.isArray(response.data) && response.data.length > 0 &&
+    response.data[0].data && typeof response.data[0].total_count === 'number') {
     // Extract the drug data from each response object
     data = response.data.map(item => item.data)
     // Get total count from the first item (all items should have the same total_count)
@@ -207,8 +207,8 @@ const parseApiResponse = (response, searchTerm = '', pageNumber = 1, pageSize = 
 
 // Main API function for searching drugs with server-side pagination and sorting
 export const searchDrugs = async (
-  searchTerm = '', 
-  pageNumber = 1, 
+  searchTerm = '',
+  pageNumber = 1,
   pageSize = 10,
   orderBy = null,
   orderDirection = 'asc'

@@ -72,8 +72,8 @@ describe('Search URL Functionality', () => {
     });
   });
 
-  test('URL encoding utilities work correctly', () => {
-    const { encodeStateToURL, decodeURLToState } = require('../utils/urlStateUtils');
+  test('URL encoding utilities work correctly', async () => {
+    const { encodeStateToURL, decodeURLToState } = await import('../utils/urlStateUtils.js');
     
     // Test encoding
     const state = {

@@ -140,26 +140,28 @@ class PerformanceMonitor {
       }
     });
 
-    // Monitor resource loading
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (entry.name.includes('.js') || entry.name.includes('.css')) {
-          this.logMetric({
-            name: 'resource-load',
-            duration: entry.duration,
-            metadata: {
-              type: 'resource-loading',
-              resource: entry.name,
-              size: entry.transferSize,
-              cached: entry.transferSize === 0
-            }
-          });
+    // Monitor resource loading (only in browser environment)
+    if (typeof PerformanceObserver !== 'undefined') {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.name.includes('.js') || entry.name.includes('.css')) {
+            this.logMetric({
+              name: 'resource-load',
+              duration: entry.duration,
+              metadata: {
+                type: 'resource-loading',
+                resource: entry.name,
+                size: entry.transferSize,
+                cached: entry.transferSize === 0
+              }
+            });
+          }
         }
-      }
-    });
+      });
     
-    observer.observe({ entryTypes: ['resource'] });
-    this.observers.set('resource', observer);
+      observer.observe({ entryTypes: ['resource'] });
+      this.observers.set('resource', observer);
+    }
   }
 
   /**

@@ -1,4 +1,4 @@
-// React import removed - not needed with new JSX transform
+import React from 'react'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import App from '../App'

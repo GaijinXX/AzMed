@@ -342,7 +342,7 @@ export function useURLState(initialState, options = {}) {
     getStateHistory: () => [...stateHistoryRef.current],
     
     // Debug information (only in development)
-    ...(import.meta.env.DEV && {
+    ...((typeof import.meta !== 'undefined' && import.meta.env?.DEV) && {
       _debug: {
         lastURL: lastURLRef.current,
         stateHistory: stateHistoryRef.current,

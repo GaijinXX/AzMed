@@ -1,4 +1,4 @@
-import { useState, useActionState, useOptimistic, useTransition, Suspense, useEffect, useCallback } from 'react'
+import React, { useState, useActionState, useOptimistic, useTransition, Suspense, useEffect, useCallback } from 'react'
 import SearchBar from './components/SearchBar'
 import DrugTable from './components/DrugTable'
 import Pagination from './components/Pagination'
