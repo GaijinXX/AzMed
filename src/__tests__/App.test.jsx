@@ -30,6 +30,37 @@ vi.mock('../services/errorLogger', () => ({
   }
 }))
 
+// Mock translation hook
+vi.mock('../hooks/useTranslation', () => ({
+  useTranslation: vi.fn(() => ({
+    t: vi.fn((key) => {
+      const translations = {
+        'header.title': 'Azerbaijan Drug Database',
+        'header.subtitle': 'Search and browse all officially registered drugs in Azerbaijan',
+        'search.placeholder': 'Search by drug name...',
+        'search.noResults': 'No drugs found matching your search criteria',
+        'results.noResultsFound': 'No results found for',
+        'table.noData': 'No data available',
+        'table.noResults': 'No drugs found. Try adjusting your search criteria.',
+        'common.loading': 'Loading...',
+        'common.error': 'Error',
+        'errors.loadingFailed': 'The database appears to be empty or there was an issue loading the drugs'
+      }
+      return translations[key] || key
+    }),
+    currentLanguage: 'en'
+  }))
+}))
+
+// Mock language context
+vi.mock('../contexts/LanguageContext', () => ({
+  default: {},
+  useLanguageContext: vi.fn(() => ({
+    setLanguage: vi.fn(),
+    currentLanguage: 'en'
+  }))
+}))
+
 // Mock components to focus on App state management
 vi.mock('../components/SearchBar', () => ({
   default: ({ initialValue, disabled }) => (
@@ -102,7 +133,7 @@ describe('App Component State Management', () => {
 
     // Wait for initial load
     await waitFor(() => {
-      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('%', 1, 10)
+      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('', 1, 10, null, 'asc')
     })
 
     // Check initial state
@@ -134,7 +165,7 @@ describe('App Component State Management', () => {
     expect(errorLogger.logApiError).toHaveBeenCalledWith(mockError, {
       endpoint: 'database-search',
       method: 'POST',
-      parameters: { searchTerm: '%', page: 1, size: 10 },
+      parameters: { searchTerm: '', page: 1, size: 10, orderBy: null, orderDir: 'asc' },
       operation: 'performSearch'
     })
   })
@@ -194,7 +225,7 @@ describe('App Component State Management', () => {
 
     // Wait for initial load
     await waitFor(() => {
-      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('%', 1, 10)
+      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('', 1, 10, null, 'asc')
     })
 
     // All state should be updated together (automatic batching)
@@ -241,7 +272,7 @@ describe('App Component Error Boundary and Loading States', () => {
     render(<App />)
 
     await waitFor(() => {
-      expect(screen.getByText('No drugs available')).toBeInTheDocument()
+      expect(screen.getByText('No data available')).toBeInTheDocument()
     })
 
     expect(screen.getByText(/the database appears to be empty or there was an issue loading the drugs/i)).toBeInTheDocument()
@@ -299,7 +330,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
 
     // 1. Verify initial data loading
     await waitFor(() => {
-      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('%', 1, 10)
+      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('', 1, 10, null, 'asc')
       expect(screen.getByTestId('drug-count')).toHaveTextContent('2')
       expect(screen.getByTestId('total-count')).toHaveTextContent('100')
     })
@@ -327,7 +358,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
 
     // Wait for initial load
     await waitFor(() => {
-      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('%', 1, 10)
+      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('', 1, 10, null, 'asc')
     })
 
     // Verify pagination components are integrated
@@ -401,7 +432,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
     render(<App />)
 
     await waitFor(() => {
-      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('%', 1, 10)
+      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('', 1, 10, null, 'asc')
     })
 
     // Verify single page results are displayed correctly
@@ -430,7 +461,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
     render(<App />)
 
     await waitFor(() => {
-      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('%', 1, 10)
+      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('', 1, 10, null, 'asc')
     })
 
     // Verify large dataset pagination is handled correctly
@@ -448,7 +479,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
 
     // Wait for initial load to complete
     await waitFor(() => {
-      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('%', 1, 10)
+      expect(supabaseService.searchDrugs).toHaveBeenCalledWith('', 1, 10, null, 'asc')
     })
 
     // Verify React 19 hooks integration:

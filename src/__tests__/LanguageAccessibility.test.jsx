@@ -38,7 +38,8 @@ vi.mock('../services/supabase', () => ({
     data: [],
     count: 0,
     error: null
-  }))
+  })),
+  getErrorMessage: vi.fn((error) => 'Test error message')
 }));
 
 // Mock localStorage

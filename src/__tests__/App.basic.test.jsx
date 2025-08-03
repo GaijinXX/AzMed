@@ -10,6 +10,36 @@ vi.mock('../services/supabase', () => ({
   getErrorMessage: vi.fn()
 }))
 
+// Mock translation hook
+vi.mock('../hooks/useTranslation', () => ({
+  useTranslation: vi.fn(() => ({
+    t: vi.fn((key) => {
+      const translations = {
+        'header.title': 'Azerbaijan Drug Database',
+        'header.subtitle': 'Search and browse all officially registered drugs in Azerbaijan',
+        'search.placeholder': 'Search by drug name...',
+        'search.noResults': 'No drugs found matching your search criteria',
+        'results.noResultsFound': 'No results found for',
+        'table.noData': 'No data available',
+        'table.noResults': 'No drugs found. Try adjusting your search criteria.',
+        'common.loading': 'Loading...',
+        'common.error': 'Error'
+      }
+      return translations[key] || key
+    }),
+    currentLanguage: 'en'
+  }))
+}))
+
+// Mock language context
+vi.mock('../contexts/LanguageContext', () => ({
+  default: {},
+  useLanguageContext: vi.fn(() => ({
+    setLanguage: vi.fn(),
+    currentLanguage: 'en'
+  }))
+}))
+
 // Mock components to focus on App state management
 vi.mock('../components/SearchBar', () => ({
   default: ({ initialValue, disabled }) => (

@@ -56,7 +56,8 @@ vi.mock('../services/supabase', () => ({
     data: [],
     count: 0,
     error: null
-  }))
+  })),
+  getErrorMessage: vi.fn((error) => 'Test error message')
 }));
 
 describe('Language Switching Integration Tests', () => {
