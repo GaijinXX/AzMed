@@ -11,6 +11,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -140,8 +141,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .sr-only {
@@ -268,6 +274,7 @@
 }
 
 /* Empty state */
+.emptyState,
 .empty-state {
   display: flex;
   align-items: center;
@@ -275,17 +282,23 @@
   min-height: 300px;
   padding: 2rem;
   text-align: center;
+  width: 100%;
 }
 
+.emptyStateContent,
 .empty-state-content {
-  max-width: 400px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
 }
 
+.emptyIcon,
 .empty-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
 }
 
+.emptyTitle,
 .empty-title {
   color: #4a5568;
   margin-bottom: 0.5rem;
@@ -293,51 +306,98 @@
   font-weight: 600;
 }
 
+.emptyDescription,
 .empty-description {
   color: #718096;
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
 
+.emptyAction,
 .empty-action {
   margin-top: 1rem;
 }
 
+/* Responsive improvements for empty state */
+@media (max-width: 768px) {
+
+  .emptyState,
+  .empty-state {
+    min-height: 250px;
+    padding: 1.5rem;
+  }
+
+  .emptyStateContent,
+  .empty-state-content {
+    max-width: 100%;
+  }
+
+  .emptyIcon,
+  .empty-icon {
+    font-size: 2.5rem;
+  }
+
+  .emptyTitle,
+  .empty-title {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .emptyState,
+  .empty-state {
+    min-height: 200px;
+    padding: 1rem;
+  }
+
+  .emptyIcon,
+  .empty-icon {
+    font-size: 2rem;
+  }
+
+  .emptyTitle,
+  .empty-title {
+    font-size: 1rem;
+  }
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
+
   .table-header-skeleton,
   .table-row-skeleton {
     grid-template-columns: 60px 1fr 1fr 80px 100px;
     font-size: 0.875rem;
   }
-  
-  .table-header-skeleton > *:nth-child(n+6),
-  .table-row-skeleton > *:nth-child(n+6) {
+
+  .table-header-skeleton>*:nth-child(n+6),
+  .table-row-skeleton>*:nth-child(n+6) {
     display: none;
   }
-  
+
   .pagination-skeleton-container {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-  
+
   .pagination-center {
     order: -1;
     margin-bottom: 1rem;
   }
-  
+
   .error-actions {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .retry-button,
   .refresh-button {
     width: 100%;
     max-width: 200px;
   }
-  
+
   .loading-overlay-content {
     margin: 1rem;
     padding: 1.5rem;

@@ -1,5 +1,6 @@
-import { useActionState, useDeferredValue, useTransition, useOptimistic, useState } from 'react';
-import { useOptimizedForm, useCompilerOptimizations } from '../../hooks/useReact19Optimizations';
+import React, { useActionState, useDeferredValue, useTransition, useState } from 'react';
+import { useCompilerOptimizations } from '../../hooks/useReact19Optimizations';
+import { useTranslation } from '../../hooks/useTranslation';
 import styles from './SearchBar.module.css';
 
 /**
@@ -10,7 +11,7 @@ import styles from './SearchBar.module.css';
 function SearchBar({ 
   onSearch, 
   initialValue = '', 
-  placeholder = 'Search for drugs by name or active ingredient...',
+  placeholder,
   disabled = false,
   'aria-describedby': ariaDescribedBy
 }) {
@@ -18,21 +19,28 @@ function SearchBar({
   const { trackRender } = useCompilerOptimizations();
   trackRender('SearchBar');
 
+  // Get translations
+  const { t } = useTranslation();
+
   const [isPending, startTransition] = useTransition();
   
   // Local state for immediate input updates
   const [inputValue, setInputValue] = useState(initialValue);
+
+  // Sync input value with initialValue prop when it changes (from URL state)
+  React.useEffect(() => {
+    setInputValue(initialValue);
+  }, [initialValue]);
   
   // Use useActionState for form handling with server actions
   const [searchState, searchAction, isSearchPending] = useActionState(
     async (prevState, formData) => {
       const searchText = formData.get('search')?.toString() || '';
       
-      // Call the parent's search handler
+      // Call the parent's search handler immediately (not in transition)
+      // The parent handler will manage its own transitions and URL updates
       if (onSearch) {
-        startTransition(() => {
-          onSearch(searchText);
-        });
+        onSearch(searchText);
       }
       
       return {
@@ -50,43 +58,27 @@ function SearchBar({
   // Use useDeferredValue for non-urgent search updates
   const deferredInputValue = useDeferredValue(inputValue);
 
-  // Optimistic updates for immediate UI feedback
-  const [optimisticState, addOptimisticUpdate] = useOptimistic(
-    { searchText: inputValue, lastSearched: searchState.lastSearched },
-    (state, newSearchText) => ({
-      ...state,
-      searchText: newSearchText,
-      isOptimistic: true
-    })
-  );
+  // Note: Optimistic updates removed for input changes as they're not needed
+  // Input value updates are already immediate via setInputValue
 
-  // Handle clear button with useTransition
-  const handleClear = () => {
-    setInputValue('');
-    startTransition(() => {
-      addOptimisticUpdate('');
-      if (onSearch) {
-        onSearch('');
-      }
-    });
-  };
+
 
   // Handle input change for immediate updates
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
-    // Use optimistic update for immediate feedback
-    addOptimisticUpdate(value);
   };
 
   const isLoading = isPending || isSearchPending;
-  const showClearButton = inputValue.length > 0;
+
+  // Use translated placeholder if not provided
+  const searchPlaceholder = placeholder || t('search.placeholder');
 
   return (
     <div className={styles.searchContainer} role="search">
       <form action={searchAction} className={styles.searchForm} role="search">
         <label htmlFor="drug-search-input" className="visually-hidden">
-          Search for drugs by name or active ingredient
+          {t('search.ariaLabel')}
         </label>
         <div className={styles.inputWrapper}>
           <input
@@ -95,10 +87,10 @@ function SearchBar({
             type="search"
             value={inputValue}
             onChange={handleInputChange}
-            placeholder={placeholder}
+            placeholder={searchPlaceholder}
             disabled={disabled || isLoading}
             className={`${styles.searchInput} ${isLoading ? styles.loading : ''}`}
-            aria-label="Search drugs by name or active ingredient"
+            aria-label={t('search.ariaLabel')}
             aria-describedby={ariaDescribedBy}
             autoComplete="off"
             spellCheck="false"
@@ -106,36 +98,22 @@ function SearchBar({
             aria-expanded="false"
           />
           
-          {showClearButton && (
-            <button
-              type="button"
-              onClick={handleClear}
-              disabled={isLoading}
-              className={styles.clearButton}
-              aria-label={`Clear search term "${inputValue}"`}
-              title="Clear search"
-            >
-              <span aria-hidden="true">✕</span>
-              <span className="visually-hidden">Clear</span>
-            </button>
-          )}
-          
           <button
             type="submit"
             disabled={isLoading}
             className={styles.searchButton}
-            aria-label={isLoading ? 'Searching...' : 'Search for drugs'}
-            title={isLoading ? 'Searching...' : 'Search'}
+            aria-label={isLoading ? t('common.loading') : t('common.search')}
+            title={isLoading ? t('common.loading') : t('common.search')}
           >
             {isLoading ? (
               <>
                 <span className={styles.spinner} aria-hidden="true">⟳</span>
-                <span className="visually-hidden">Searching...</span>
+                <span className="visually-hidden">{t('common.loading')}</span>
               </>
             ) : (
               <>
                 <span aria-hidden="true">🔍</span>
-                <span className="visually-hidden">Search</span>
+                <span className="visually-hidden">{t('common.search')}</span>
               </>
             )}
           </button>
@@ -147,10 +125,10 @@ function SearchBar({
           className={styles.loadingIndicator} 
           role="status" 
           aria-live="polite"
-          aria-label="Search in progress"
+          aria-label={t('common.loading')}
         >
           <span className={styles.spinner} aria-hidden="true">⟳</span>
-          Searching for drugs...
+          {t('common.loading')}
         </div>
       )}
     </div>

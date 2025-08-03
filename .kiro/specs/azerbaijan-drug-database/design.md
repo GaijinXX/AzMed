@@ -302,10 +302,10 @@ interface Drug {
   number: number;           // Registration number
   product_name: string;     // Product name
   active_ingredients: string; // Active ingredients (comma-separated)
-  dosage_amount: string;    // Dosage amount with units
-  dosage_form: string;      // Form (tablet, injection, etc.)
+  dosage_amount: string;    // Dosage with units
+  dosage_form: string;      // Formulation (tablet, injection, etc.)
   packaging_form: string;   // Packaging description
-  amount: string;           // Package amount
+  amount: string;           // Amount
   manufacturer: string;     // Manufacturer name and country
   wholesale_price: number;  // Price in qəpik
   retail_price: number;     // Price in qəpik

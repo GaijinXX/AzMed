@@ -35,15 +35,15 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
   const shortDate = date ? new Date(date).toLocaleDateString() : 'N/A';
 
   return (
-    <tr 
+    <tr
       className={styles.tableRow}
       role="row"
       aria-rowindex={rowIndex + 1}
       aria-label={`Drug ${rowIndex} of ${totalRows}: ${product_name || 'Unknown product'}`}
     >
       {visibleColumns.number && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Registration #"
           role="gridcell"
           aria-label={`Registration number: ${number || 'Not available'}`}
@@ -51,10 +51,10 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
           <span className={styles.cellContent}>{number || 'N/A'}</span>
         </td>
       )}
-      
+
       {visibleColumns.product_name && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Product Name"
           role="gridcell"
           aria-label={`Product name: ${product_name || 'Not available'}`}
@@ -64,10 +64,10 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
           </span>
         </td>
       )}
-      
+
       {visibleColumns.active_ingredients && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Active Ingredients"
           role="gridcell"
           aria-label={`Active ingredients: ${active_ingredients || 'Not available'}`}
@@ -77,36 +77,36 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
           </span>
         </td>
       )}
-      
+
       {visibleColumns.dosage_amount && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Dosage"
           role="gridcell"
-          aria-label={`Dosage amount: ${dosage_amount || 'Not available'}`}
+          aria-label={`Dosage: ${dosage_amount || 'Not available'}`}
         >
           <span className={styles.cellContent} title={dosage_amount}>
             {truncateText(dosage_amount, 30)}
           </span>
         </td>
       )}
-      
+
       {visibleColumns.dosage_form && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Form"
           role="gridcell"
-          aria-label={`Dosage form: ${dosage_form || 'Not available'}`}
+          aria-label={`Formulation: ${dosage_form || 'Not available'}`}
         >
           <span className={styles.cellContent} title={dosage_form}>
             {truncateText(dosage_form, 25)}
           </span>
         </td>
       )}
-      
+
       {visibleColumns.packaging_form && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Packaging"
           role="gridcell"
           aria-label={`Packaging form: ${packaging_form || 'Not available'}`}
@@ -116,23 +116,23 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
           </span>
         </td>
       )}
-      
+
       {visibleColumns.amount && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Amount"
           role="gridcell"
-          aria-label={`Package amount: ${amount || 'Not available'}`}
+          aria-label={`Amount: ${amount || 'Not available'}`}
         >
           <span className={styles.cellContent} title={amount}>
             {truncateText(amount, 25)}
           </span>
         </td>
       )}
-      
+
       {visibleColumns.manufacturer && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Manufacturer"
           role="gridcell"
           aria-label={`Manufacturer: ${manufacturer || 'Not available'}`}
@@ -142,10 +142,10 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
           </span>
         </td>
       )}
-      
+
       {visibleColumns.wholesale_price && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Wholesale Price"
           role="gridcell"
           aria-label={`Wholesale price: ${formatPrice(wholesale_price)}`}
@@ -155,10 +155,10 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
           </span>
         </td>
       )}
-      
+
       {visibleColumns.retail_price && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Retail Price"
           role="gridcell"
           aria-label={`Retail price: ${formatPrice(retail_price)}`}
@@ -168,10 +168,10 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
           </span>
         </td>
       )}
-      
+
       {visibleColumns.date && (
-        <td 
-          className={styles.tableCell} 
+        <td
+          className={styles.tableCell}
           data-label="Date"
           role="gridcell"
           aria-label={`Registration date: ${formattedDate}`}

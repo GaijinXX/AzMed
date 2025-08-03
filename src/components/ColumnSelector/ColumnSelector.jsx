@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './ColumnSelector.module.css';
+import { useTranslation } from '../../hooks/useTranslation';
 
 /**
  * ColumnSelector component for controlling table column visibility
@@ -9,8 +10,11 @@ function ColumnSelector({
   columns = [], 
   visibleColumns = {}, 
   onColumnToggle,
+  onShowAll,
+  onHideOptional,
   disabled = false 
 }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
@@ -78,11 +82,11 @@ function ColumnSelector({
         disabled={disabled}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        aria-label={`Column visibility settings. ${visibleCount} of ${totalCount} columns visible`}
-        title="Show/hide table columns"
+        aria-label={`${t('columns.settings')}. ${visibleCount} ${t('columns.of')} ${totalCount} ${t('columns.visible')}`}
+        title={t('columns.showHideColumns')}
       >
         <span className={styles.buttonIcon} aria-hidden="true">⚙️</span>
-        <span className={styles.buttonText}>Columns</span>
+        <span className={styles.buttonText}>{t('columns.columns')}</span>
         <span className={styles.columnCount}>({visibleCount}/{totalCount})</span>
         <span className={`${styles.dropdownArrow} ${isOpen ? styles.open : ''}`} aria-hidden="true">
           ▼
@@ -93,10 +97,10 @@ function ColumnSelector({
         <div 
           className={styles.dropdown}
           role="menu"
-          aria-label="Column visibility options"
+          aria-label={t('columns.visibilityOptions')}
         >
           <div className={styles.dropdownHeader}>
-            <span className={styles.headerText}>Show/Hide Columns</span>
+            <span className={styles.headerText}>{t('columns.showHide')}</span>
           </div>
           
           <div className={styles.columnList}>
@@ -112,7 +116,7 @@ function ColumnSelector({
                   className={styles.checkbox}
                   checked={visibleColumns[column.key] || false}
                   onChange={() => handleColumnToggle(column.key)}
-                  aria-label={`Toggle ${column.label} column visibility`}
+                  aria-label={`${t('columns.toggle')} ${column.label} ${t('columns.columnVisibility')}`}
                 />
                 <span className={styles.checkboxCustom} aria-hidden="true">
                   {visibleColumns[column.key] ? '✓' : ''}
@@ -120,7 +124,7 @@ function ColumnSelector({
                 <span className={styles.columnLabel}>
                   {column.label}
                   {column.required && (
-                    <span className={styles.requiredIndicator} title="Required column">
+                    <span className={styles.requiredIndicator} title={t('columns.required')}>
                       *
                     </span>
                   )}
@@ -133,30 +137,38 @@ function ColumnSelector({
             <button
               className={styles.actionButton}
               onClick={() => {
-                // Show all columns
-                columns.forEach(column => {
-                  if (!visibleColumns[column.key]) {
-                    handleColumnToggle(column.key);
-                  }
-                });
+                if (onShowAll) {
+                  onShowAll();
+                } else {
+                  // Fallback to individual toggles if onShowAll not provided
+                  columns.forEach(column => {
+                    if (!visibleColumns[column.key]) {
+                      handleColumnToggle(column.key);
+                    }
+                  });
+                }
               }}
               type="button"
             >
-              Show All
+              {t('columns.showAll')}
             </button>
             <button
               className={styles.actionButton}
               onClick={() => {
-                // Hide all non-required columns
-                columns.forEach(column => {
-                  if (!column.required && visibleColumns[column.key]) {
-                    handleColumnToggle(column.key);
-                  }
-                });
+                if (onHideOptional) {
+                  onHideOptional();
+                } else {
+                  // Fallback to individual toggles if onHideOptional not provided
+                  columns.forEach(column => {
+                    if (!column.required && visibleColumns[column.key]) {
+                      handleColumnToggle(column.key);
+                    }
+                  });
+                }
               }}
               type="button"
             >
-              Hide Optional
+              {t('columns.hideOptional')}
             </button>
           </div>
         </div>
@@ -169,7 +181,7 @@ function ColumnSelector({
         aria-live="polite"
         aria-atomic="true"
       >
-        {visibleCount} of {totalCount} columns visible
+        {visibleCount} {t('columns.of')} {totalCount} {t('columns.visible')}
       </div>
     </div>
   );

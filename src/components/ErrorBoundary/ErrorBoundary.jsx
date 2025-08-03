@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
 import './ErrorBoundary.module.css'
+import LanguageContext from '../../contexts/LanguageContext'
 
 class ErrorBoundary extends Component {
+  static contextType = LanguageContext;
+  
   constructor(props) {
     super(props)
     this.state = { 
@@ -61,6 +64,7 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       const { fallback: Fallback } = this.props
+      const { t } = this.context;
 
       // Use custom fallback if provided
       if (Fallback) {
@@ -79,10 +83,9 @@ class ErrorBoundary extends Component {
         <div className="error-boundary" role="alert">
           <div className="error-boundary-content">
             <div className="error-icon">⚠️</div>
-            <h2>Something went wrong</h2>
+            <h2>{t('errors.somethingWentWrong')}</h2>
             <p>
-              We're sorry, but something unexpected happened. 
-              The application encountered an error and couldn't continue.
+              {t('errors.unexpectedError')}
             </p>
             
             <div className="error-actions">
@@ -91,26 +94,26 @@ class ErrorBoundary extends Component {
                 className="retry-button primary"
                 type="button"
               >
-                Try Again
+                {t('errors.tryAgain')}
               </button>
               <button 
                 onClick={this.handleRefresh}
                 className="refresh-button secondary"
                 type="button"
               >
-                Refresh Page
+                {t('errors.refreshPage')}
               </button>
             </div>
 
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="error-details">
-                <summary>Error Details (Development Only)</summary>
+                <summary>{t('errors.errorDetails')}</summary>
                 <pre className="error-stack">
-                  <strong>Error ID:</strong> {this.state.errorId}
+                  <strong>{t('errors.errorId')}:</strong> {this.state.errorId}
                   {'\n'}
-                  <strong>Message:</strong> {this.state.error.message}
+                  <strong>{t('errors.message')}:</strong> {this.state.error.message}
                   {'\n'}
-                  <strong>Stack:</strong>
+                  <strong>{t('errors.stack')}:</strong>
                   {'\n'}
                   {this.state.error.stack}
                 </pre>

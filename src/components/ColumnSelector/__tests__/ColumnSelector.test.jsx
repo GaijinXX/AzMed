@@ -9,7 +9,7 @@ const mockColumns = [
   { key: 'number', label: 'Registration #', required: true },
   { key: 'product_name', label: 'Product Name', required: true },
   { key: 'active_ingredients', label: 'Active Ingredients', required: false },
-  { key: 'dosage_amount', label: 'Dosage Amount', required: false },
+  { key: 'dosage_amount', label: 'Dosage', required: false },
   { key: 'manufacturer', label: 'Manufacturer', required: false }
 ];
 
@@ -77,7 +77,7 @@ describe('ColumnSelector', () => {
     expect(screen.getByText('Registration #')).toBeInTheDocument();
     expect(screen.getByText('Product Name')).toBeInTheDocument();
     expect(screen.getByText('Active Ingredients')).toBeInTheDocument();
-    expect(screen.getByText('Dosage Amount')).toBeInTheDocument();
+    expect(screen.getByText('Dosage')).toBeInTheDocument();
     expect(screen.getByText('Manufacturer')).toBeInTheDocument();
 
     // Check checkbox states
@@ -118,7 +118,7 @@ describe('ColumnSelector', () => {
     const button = screen.getByRole('button', { name: /column visibility settings/i });
     await user.click(button);
 
-    const dosageAmountCheckbox = screen.getByLabelText(/toggle dosage amount column visibility/i);
+    const dosageAmountCheckbox = screen.getByLabelText(/toggle dosage column visibility/i);
     await user.click(dosageAmountCheckbox);
 
     expect(mockOnColumnToggle).toHaveBeenCalledWith('dosage_amount');
@@ -301,7 +301,7 @@ describe('ColumnSelector', () => {
     const button = screen.getByRole('button', { name: /column visibility settings/i });
     await user.click(button);
 
-    const checkbox = screen.getByLabelText(/toggle dosage amount column visibility/i);
+    const checkbox = screen.getByLabelText(/toggle dosage column visibility/i);
     
     // Should not throw error when clicking checkbox without onColumnToggle
     expect(() => user.click(checkbox)).not.toThrow();

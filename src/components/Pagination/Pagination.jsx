@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from '../../hooks/useTranslation';
 import styles from './Pagination.module.css';
 
 /**
@@ -17,18 +18,12 @@ function Pagination({
 }) {
   const [isPending, setIsPending] = useState(false);
 
-  // Use local state for optimistic updates
-  const [optimisticPage, setOptimisticPage] = useState(currentPage);
-  const [optimisticPageSize, setOptimisticPageSize] = useState(pageSize);
+  // Get translations
+  const { t } = useTranslation();
 
-  // Update optimistic values when props change
-  useEffect(() => {
-    setOptimisticPage(currentPage);
-  }, [currentPage]);
-
-  useEffect(() => {
-    setOptimisticPageSize(pageSize);
-  }, [pageSize]);
+  // Use props directly since URL state handles optimistic updates
+  const optimisticPage = currentPage;
+  const optimisticPageSize = pageSize;
 
   // Calculate page range for display
   const pageRange = useMemo(() => {
@@ -72,11 +67,10 @@ function Pagination({
     return rangeWithDots;
   }, [optimisticPage, totalPages]);
 
-  // Handle page change with optimistic updates
+  // Handle page change
   const handlePageChange = useCallback((newPage) => {
     if (newPage === currentPage || newPage < 1 || newPage > totalPages) return;
     
-    setOptimisticPage(newPage);
     setIsPending(true);
     
     if (onPageChange) {
@@ -88,11 +82,10 @@ function Pagination({
     }
   }, [currentPage, totalPages, onPageChange]);
 
-  // Handle page size change with optimistic updates
+  // Handle page size change
   const handlePageSizeChange = useCallback((newSize) => {
     if (newSize === pageSize) return;
     
-    setOptimisticPageSize(newSize);
     setIsPending(true);
     
     if (onPageSizeChange) {
@@ -120,13 +113,13 @@ function Pagination({
     <div 
       className={styles.paginationContainer}
       role="navigation"
-      aria-label="Pagination navigation"
+      aria-label={t('pagination.navigation')}
       aria-describedby={ariaDescribedBy}
     >
       {/* Page size selector */}
       <div className={styles.pageSizeSection} role="group" aria-labelledby="page-size-label">
         <label id="page-size-label" htmlFor="pageSize" className={styles.pageSizeLabel}>
-          Items per page:
+          {t('pagination.itemsPerPage')}:
         </label>
         <div className={styles.pageSizeForm}>
           <select
@@ -139,13 +132,13 @@ function Pagination({
             }}
             disabled={disabled || isLoading}
             className={styles.pageSizeSelect}
-            aria-label={`Select page size, currently showing ${optimisticPageSize} items per page`}
+            aria-label={`${t('pagination.selectPageSize')}, ${t('pagination.currentlyShowing')} ${optimisticPageSize} ${t('pagination.itemsPerPage')}`}
             aria-describedby="page-info"
           >
-            <option value={10}>10 items</option>
-            <option value={25}>25 items</option>
-            <option value={50}>50 items</option>
-            <option value={100}>100 items</option>
+            <option value={10}>10 {t('pagination.items')}</option>
+            <option value={25}>25 {t('pagination.items')}</option>
+            <option value={50}>50 {t('pagination.items')}</option>
+            <option value={100}>100 {t('pagination.items')}</option>
           </select>
         </div>
       </div>
@@ -158,28 +151,28 @@ function Pagination({
         aria-live="polite"
         aria-atomic="true"
       >
-        Showing {startItem}-{endItem} of {totalCount} items (Page {optimisticPage} of {totalPages})
+        {t('pagination.showing')} {startItem}-{endItem} {t('pagination.of')} {totalCount} {t('pagination.items')} ({t('pagination.page')} {optimisticPage} {t('pagination.of')} {totalPages})
       </div>
 
       {/* Page navigation */}
       <div 
         className={styles.pageNavigation}
         role="group"
-        aria-label="Page navigation controls"
+        aria-label={t('pagination.pageControls')}
       >
         {/* Previous button */}
         <button
           onClick={() => handlePageChange(optimisticPage - 1)}
           disabled={disabled || isLoading || optimisticPage <= 1}
           className={`${styles.navButton} ${styles.prevButton}`}
-          aria-label={`Go to previous page, page ${optimisticPage - 1} of ${totalPages}`}
-          title="Previous page"
+          aria-label={`${t('pagination.goToPrevious')}, ${t('pagination.page')} ${optimisticPage - 1} ${t('pagination.of')} ${totalPages}`}
+          title={t('pagination.previous')}
         >
-          <span aria-hidden="true">‹</span> Previous
+          <span aria-hidden="true">‹</span> {t('pagination.previous')}
         </button>
 
         {/* Page numbers */}
-        <div className={styles.pageNumbers} role="group" aria-label="Page numbers">
+        <div className={styles.pageNumbers} role="group" aria-label={t('pagination.pageNumbers')}>
           {pageRange.map((page, index) => {
             if (page === '...') {
               return (
@@ -203,9 +196,9 @@ function Pagination({
                   onClick={() => handlePageChange(page)}
                   disabled={disabled || isLoading || isCurrentPage}
                   className={`${styles.pageButton} ${isCurrentPage ? styles.currentPage : ''}`}
-                  aria-label={isCurrentPage ? `Current page, page ${page} of ${totalPages}` : `Go to page ${page} of ${totalPages}`}
+                  aria-label={isCurrentPage ? `${t('pagination.currentPage')}, ${t('pagination.page')} ${page} ${t('pagination.of')} ${totalPages}` : `${t('pagination.goToPage')} ${page} ${t('pagination.of')} ${totalPages}`}
                   aria-current={isCurrentPage ? 'page' : undefined}
-                  title={isCurrentPage ? `Current page ${page}` : `Go to page ${page}`}
+                  title={isCurrentPage ? `${t('pagination.currentPage')} ${page}` : `${t('pagination.goToPage')} ${page}`}
                 >
                   {page}
                 </button>
@@ -219,10 +212,10 @@ function Pagination({
           onClick={() => handlePageChange(optimisticPage + 1)}
           disabled={disabled || isLoading || optimisticPage >= totalPages}
           className={`${styles.navButton} ${styles.nextButton}`}
-          aria-label={`Go to next page, page ${optimisticPage + 1} of ${totalPages}`}
-          title="Next page"
+          aria-label={`${t('pagination.goToNext')}, ${t('pagination.page')} ${optimisticPage + 1} ${t('pagination.of')} ${totalPages}`}
+          title={t('pagination.next')}
         >
-          Next <span aria-hidden="true">›</span>
+          {t('pagination.next')} <span aria-hidden="true">›</span>
         </button>
       </div>
 
@@ -232,10 +225,10 @@ function Pagination({
           className={styles.loadingIndicator} 
           role="status"
           aria-live="polite"
-          aria-label="Loading new page"
+          aria-label={t('pagination.loadingPage')}
         >
           <span className={styles.spinner} aria-hidden="true">⟳</span>
-          Loading page {optimisticPage}...
+          {t('pagination.loadingPage')} {optimisticPage}...
         </div>
       )}
     </div>

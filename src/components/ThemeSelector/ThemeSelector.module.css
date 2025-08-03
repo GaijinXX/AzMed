@@ -1,0 +1,277 @@
+/* Theme Selector Component Styles */
+.themeSelector {
+  position: relative;
+  display: inline-block;
+}
+
+.themeButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0.5rem;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  justify-content: space-between;
+}
+
+.themeButton:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+}
+
+.themeButton:focus {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.themeIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.themeLabel {
+  flex: 1;
+  text-align: left;
+}
+
+.dropdownArrow {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.themeButton[aria-expanded="true"] .dropdownArrow {
+  transform: rotate(180deg);
+}
+
+.themeDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  overflow: hidden;
+  min-width: 100px;
+  white-space: nowrap;
+}
+
+/* Mobile positioning fix */
+@media (max-width: 768px) {
+  .themeSelector {
+    position: static;
+  }
+
+  .themeDropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    margin-top: 0.75rem;
+    z-index: 9999;
+  }
+}
+
+.themeOption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+}
+
+.themeOption:hover {
+  background: var(--color-bg-secondary);
+}
+
+.themeOption:focus {
+  outline: none;
+  background: var(--color-bg-secondary);
+}
+
+.themeOptionActive {
+  background: var(--color-bg-tertiary);
+  font-weight: 600;
+}
+
+.themeOptionActive:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.checkmark {
+  margin-left: auto;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .themeButton {
+    padding: 0.625rem 0.75rem;
+    min-width: 70px;
+  }
+
+  .themeIcon {
+    font-size: 0.875rem;
+  }
+
+  .themeLabel {
+    font-size: 0.8rem;
+  }
+
+  .dropdownArrow {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .themeButton {
+    padding: 0.5rem;
+    min-width: 60px;
+  }
+
+  .themeLabel {
+    display: none;
+    /* Hide text on very small screens, show only icon */
+  }
+
+  .themeButton {
+    justify-content: center;
+  }
+
+  .dropdownArrow {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 0.6rem;
+  }
+
+  .themeDropdown {
+    min-width: 120px;
+    /* Ensure dropdown is wide enough to show labels */
+  }
+
+  .themeOption .themeLabel {
+    display: block;
+    /* Show labels in dropdown even on small screens */
+  }
+}
+
+/* Full width styles for mobile theme selector container */
+@media (max-width: 768px) {
+  :global(.mobile-theme-selector) .themeSelector {
+    width: 100%;
+    position: relative;
+    /* Ensure dropdown positions relative to this container */
+  }
+
+  :global(.mobile-theme-selector) .themeButton {
+    width: 100%;
+    justify-content: space-between;
+    min-width: unset;
+    padding: 0.75rem 1rem;
+  }
+
+  :global(.mobile-theme-selector) .themeLabel {
+    display: block !important;
+    font-size: 0.875rem;
+  }
+
+  :global(.mobile-theme-selector) .themeDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    transform: none;
+    margin-top: 0.5rem;
+    min-width: unset;
+    width: 100%;
+    z-index: 9999;
+    /* Higher z-index to ensure it appears above other content */
+  }
+
+  :global(.mobile-theme-selector) .dropdownArrow {
+    position: static;
+    font-size: 0.75rem;
+  }
+}
+
+/* Dark mode specific adjustments */
+@media (prefers-color-scheme: dark) {
+  .themeDropdown {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .themeButton {
+    border-width: 2px;
+  }
+
+  .themeDropdown {
+    border-width: 2px;
+  }
+
+  .themeOptionActive {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+  .themeButton,
+  .themeOption,
+  .dropdownArrow {
+    transition: none;
+  }
+
+  .themeButton[aria-expanded="true"] .dropdownArrow {
+    transform: none;
+  }
+}
+
+/* Focus management for keyboard navigation - handled by component logic */
+
+/* Animation for dropdown appearance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.themeDropdown {
+  animation: fadeIn 0.15s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .themeDropdown {
+    animation: none;
+  }
+}

@@ -49,6 +49,22 @@
   border-right: none;
 }
 
+/* Sortable header integration styles */
+.sortableHeaderCell {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+.sortableHeaderCell:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sortableHeaderCell:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: -2px;
+}
+
 /* Table Body */
 .tableBody {
   background: var(--color-bg-primary);
@@ -65,8 +81,12 @@
   background: var(--color-bg-primary);
 }
 
+.tableRow:nth-child(even) {
+  background: var(--color-bg-secondary);
+}
+
 .tableRow:hover {
-  background-color: var(--color-bg-secondary);
+  background-color: var(--color-bg-tertiary);
 }
 
 .tableRow:last-child {
@@ -372,8 +392,12 @@
     border-bottom-color: var(--color-border-primary);
   }
   
+  .tableRow:nth-child(even) {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
   .tableRow:hover {
-    background-color: var(--color-bg-secondary);
+    background-color: rgba(255, 255, 255, 0.1);
   }
   
   .tableCell {

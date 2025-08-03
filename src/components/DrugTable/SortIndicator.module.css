@@ -1,0 +1,153 @@
+/* Sort indicator container */
+.sortIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  font-size: 0.875rem;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+  margin-left: 0.25rem;
+}
+
+/* Neutral sort icon (not sorted) */
+.sortIconNeutral {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: normal;
+  transition: color 0.15s ease;
+}
+
+/* Active sort icons */
+.sortIconAsc,
+.sortIconDesc {
+  color: white;
+  font-weight: bold;
+  font-size: 0.875rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.sortIconAsc {
+  transform: translateY(-1px);
+}
+
+.sortIconDesc {
+  transform: translateY(1px);
+}
+
+/* Hover states */
+.sortIndicator:hover .sortIconNeutral {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sortIndicator:hover .sortIconAsc,
+.sortIndicator:hover .sortIconDesc {
+  transform: scale(1.1);
+}
+
+.sortIndicator:hover .sortIconAsc {
+  transform: translateY(-1px) scale(1.1);
+}
+
+.sortIndicator:hover .sortIconDesc {
+  transform: translateY(1px) scale(1.1);
+}
+
+/* Loading state animation */
+.sortIndicator.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 0.6; 
+  }
+  50% { 
+    opacity: 1; 
+  }
+}
+
+/* Responsive design - Mobile */
+@media (max-width: 768px) {
+  .sortIndicator {
+    width: 0.875rem;
+    height: 0.875rem;
+    font-size: 0.75rem;
+    margin-left: 0.125rem;
+  }
+  
+  .sortIconNeutral {
+    font-size: 0.625rem;
+  }
+  
+  .sortIconAsc,
+  .sortIconDesc {
+    font-size: 0.75rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .sortIndicator {
+    width: 0.75rem;
+    height: 0.75rem;
+    font-size: 0.625rem;
+    margin-left: 0.125rem;
+  }
+  
+  .sortIconNeutral {
+    font-size: 0.5rem;
+  }
+  
+  .sortIconAsc,
+  .sortIconDesc {
+    font-size: 0.625rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .sortIconNeutral {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .sortIconAsc,
+  .sortIconDesc {
+    color: white;
+    text-shadow: 1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .sortIndicator,
+  .sortIconNeutral,
+  .sortIconAsc,
+  .sortIconDesc {
+    transition: none;
+    animation: none;
+  }
+  
+  .sortIndicator:hover .sortIconAsc,
+  .sortIndicator:hover .sortIconDesc {
+    transform: none;
+  }
+  
+  .sortIconAsc {
+    transform: none;
+  }
+  
+  .sortIconDesc {
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .sortIndicator {
+    display: none;
+  }
+}

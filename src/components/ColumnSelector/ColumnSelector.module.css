@@ -240,9 +240,13 @@
 }
 
 @media (max-width: 480px) {
+  .columnSelector {
+    width: 100%;
+  }
+  
   .dropdown {
-    right: -0.5rem;
-    left: -0.5rem;
+    right: 0;
+    left: 0;
     min-width: auto;
     max-width: none;
     margin-top: 0.5rem;

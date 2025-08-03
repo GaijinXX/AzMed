@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import DrugTable from '../DrugTable';
+import { LanguageProvider } from '../../../contexts/LanguageContext';
 
 // Mock the formatters module
 vi.mock('../../../utils/formatters', () => ({
@@ -54,18 +55,25 @@ const allColumnsVisible = {
   date: true
 };
 
+// Test wrapper with LanguageProvider
+const TestWrapper = ({ children }) => (
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
+);
+
 describe('DrugTable', () => {
   it('renders table with drug data', () => {
-    render(<DrugTable drugs={mockDrugs} visibleColumns={allColumnsVisible} />);
+    render(<DrugTable drugs={mockDrugs} visibleColumns={allColumnsVisible} />, { wrapper: TestWrapper });
     
     // Check table headers (using title attribute for abbreviated headers)
-    expect(screen.getByTitle('Registration Number')).toBeInTheDocument();
+    expect(screen.getByTitle('Registration #')).toBeInTheDocument();
     expect(screen.getByText('Product Name')).toBeInTheDocument();
     expect(screen.getByText('Active Ingredients')).toBeInTheDocument();
-    expect(screen.getByText('Dosage Amount')).toBeInTheDocument();
-    expect(screen.getByText('Dosage Form')).toBeInTheDocument();
+    expect(screen.getByText('Dosage')).toBeInTheDocument();
+    expect(screen.getByText('Formulation')).toBeInTheDocument();
     expect(screen.getByText('Packaging Form')).toBeInTheDocument();
-    expect(screen.getByText('Package Amount')).toBeInTheDocument();
+    expect(screen.getByText('Amount')).toBeInTheDocument();
     expect(screen.getByText('Manufacturer')).toBeInTheDocument();
     expect(screen.getByTitle('Wholesale Price in Azerbaijan Manat')).toBeInTheDocument();
     expect(screen.getByTitle('Retail Price in Azerbaijan Manat')).toBeInTheDocument();
@@ -79,22 +87,22 @@ describe('DrugTable', () => {
   });
 
   it('renders empty state when no drugs provided', () => {
-    render(<DrugTable drugs={[]} visibleColumns={allColumnsVisible} />);
+    render(<DrugTable drugs={[]} visibleColumns={allColumnsVisible} />, { wrapper: TestWrapper });
     
     expect(screen.getByText('No drugs found. Try adjusting your search criteria.')).toBeInTheDocument();
   });
 
   it('renders empty state when drugs is null or undefined', () => {
-    render(<DrugTable drugs={null} visibleColumns={allColumnsVisible} />);
+    render(<DrugTable drugs={null} visibleColumns={allColumnsVisible} />, { wrapper: TestWrapper });
     
     expect(screen.getByText('No drugs found. Try adjusting your search criteria.')).toBeInTheDocument();
   });
 
   it('renders loading skeleton when loading is true', () => {
-    render(<DrugTable drugs={mockDrugs} loading={true} visibleColumns={allColumnsVisible} />);
+    render(<DrugTable drugs={mockDrugs} loading={true} visibleColumns={allColumnsVisible} />, { wrapper: TestWrapper });
     
     // Should show table headers (using title attribute for abbreviated headers)
-    expect(screen.getByTitle('Registration Number')).toBeInTheDocument();
+    expect(screen.getByTitle('Registration #')).toBeInTheDocument();
     
     // Should show skeleton rows (check for skeleton class using CSS modules pattern)
     const skeletonRows = document.querySelectorAll('tr[class*="skeletonRow"]');
@@ -102,14 +110,14 @@ describe('DrugTable', () => {
   });
 
   it('applies pending class when isPending is true', () => {
-    render(<DrugTable drugs={mockDrugs} isPending={true} visibleColumns={allColumnsVisible} />);
+    render(<DrugTable drugs={mockDrugs} isPending={true} visibleColumns={allColumnsVisible} />, { wrapper: TestWrapper });
     
     const tableBody = document.querySelector('tbody');
     expect(tableBody.className).toMatch(/pending/);
   });
 
   it('has proper table structure and accessibility', () => {
-    render(<DrugTable drugs={mockDrugs} visibleColumns={allColumnsVisible} />);
+    render(<DrugTable drugs={mockDrugs} visibleColumns={allColumnsVisible} />, { wrapper: TestWrapper });
     
     const table = screen.getByRole('table');
     expect(table).toBeInTheDocument();
@@ -124,7 +132,7 @@ describe('DrugTable', () => {
   });
 
   it('renders correct number of rows for given drugs', () => {
-    render(<DrugTable drugs={mockDrugs} />);
+    render(<DrugTable drugs={mockDrugs} />, { wrapper: TestWrapper });
     
     const rows = screen.getAllByRole('row');
     // 1 header row + 2 data rows
@@ -132,7 +140,7 @@ describe('DrugTable', () => {
   });
 
   it('handles empty drugs array gracefully', () => {
-    render(<DrugTable drugs={[]} visibleColumns={allColumnsVisible} />);
+    render(<DrugTable drugs={[]} visibleColumns={allColumnsVisible} />, { wrapper: TestWrapper });
     
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(screen.getByText('No drugs found. Try adjusting your search criteria.')).toBeInTheDocument();
@@ -141,16 +149,16 @@ describe('DrugTable', () => {
 
 describe('TableHeader', () => {
   it('renders all required column headers', () => {
-    render(<DrugTable drugs={mockDrugs} visibleColumns={allColumnsVisible} />);
+    render(<DrugTable drugs={mockDrugs} visibleColumns={allColumnsVisible} />, { wrapper: TestWrapper });
     
     // Check for headers using appropriate selectors
-    expect(screen.getByTitle('Registration Number')).toBeInTheDocument();
+    expect(screen.getByTitle('Registration #')).toBeInTheDocument();
     expect(screen.getByText('Product Name')).toBeInTheDocument();
     expect(screen.getByText('Active Ingredients')).toBeInTheDocument();
-    expect(screen.getByText('Dosage Amount')).toBeInTheDocument();
-    expect(screen.getByText('Dosage Form')).toBeInTheDocument();
+    expect(screen.getByText('Dosage')).toBeInTheDocument();
+    expect(screen.getByText('Formulation')).toBeInTheDocument();
     expect(screen.getByText('Packaging Form')).toBeInTheDocument();
-    expect(screen.getByText('Package Amount')).toBeInTheDocument();
+    expect(screen.getByText('Amount')).toBeInTheDocument();
     expect(screen.getByText('Manufacturer')).toBeInTheDocument();
     expect(screen.getByTitle('Wholesale Price in Azerbaijan Manat')).toBeInTheDocument();
     expect(screen.getByTitle('Retail Price in Azerbaijan Manat')).toBeInTheDocument();
@@ -160,7 +168,7 @@ describe('TableHeader', () => {
 
 describe('TableSkeleton', () => {
   it('renders skeleton with correct structure', () => {
-    render(<DrugTable drugs={[]} loading={true} />);
+    render(<DrugTable drugs={[]} loading={true} />, { wrapper: TestWrapper });
     
     // Should have table structure
     expect(screen.getByRole('table')).toBeInTheDocument();

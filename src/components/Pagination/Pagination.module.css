@@ -67,6 +67,8 @@
   justify-content: center;
 }
 
+
+
 .navButton {
   padding: 8px 12px;
   border: 1px solid var(--color-border-primary);
@@ -212,12 +214,57 @@
     gap: 0.25rem;
   }
 
+  /* Create a flex container for Previous and Next buttons on mobile */
   .prevButton,
   .nextButton {
     order: 2;
     margin: 0;
     flex: 1;
-    max-width: 140px;
+    max-width: none;
+  }
+
+  /* Use CSS Grid to place buttons side by side */
+  .pageNavigation {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .pageNumbers {
+    grid-row: 1;
+  }
+
+  .prevButton {
+    grid-row: 2;
+    grid-column: 1;
+    margin-right: 0.25rem;
+  }
+
+  .nextButton {
+    grid-row: 2;
+    grid-column: 2;
+    margin-left: 0.25rem;
+  }
+
+  /* Set up the grid for navigation buttons */
+  .pageNavigation {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+      "pages pages"
+      "prev next";
+  }
+
+  .pageNumbers {
+    grid-area: pages;
+  }
+
+  .prevButton {
+    grid-area: prev;
+  }
+
+  .nextButton {
+    grid-area: next;
   }
 
   .navButton {

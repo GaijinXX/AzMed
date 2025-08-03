@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Pagination from '../Pagination';
+import { LanguageProvider } from '../../../contexts/LanguageContext';
 
 // Mock React hooks that might not be available in current React version
 vi.mock('react', async () => {
@@ -28,9 +29,16 @@ describe('Pagination Component', () => {
     vi.clearAllMocks();
   });
 
+  // Test wrapper with LanguageProvider
+  const TestWrapper = ({ children }) => (
+    <LanguageProvider>
+      {children}
+    </LanguageProvider>
+  );
+
   describe('Rendering', () => {
     it('renders pagination controls when there are multiple pages', () => {
-      render(<Pagination {...defaultProps} />);
+      render(<Pagination {...defaultProps} />, { wrapper: TestWrapper });
       
       expect(screen.getByText('Items per page:')).toBeInTheDocument();
       expect(screen.getByText(/showing 1-10 of 50 items/i)).toBeInTheDocument();
@@ -40,7 +48,8 @@ describe('Pagination Component', () => {
 
     it('does not render when there is only one page', () => {
       const { container } = render(
-        <Pagination {...defaultProps} totalPages={1} totalCount={5} />
+        <Pagination {...defaultProps} totalPages={1} totalCount={5} />,
+        { wrapper: TestWrapper }
       );
       
       expect(container.firstChild).toBeNull();
@@ -48,14 +57,15 @@ describe('Pagination Component', () => {
 
     it('does not render when there are no results', () => {
       const { container } = render(
-        <Pagination {...defaultProps} totalPages={0} totalCount={0} />
+        <Pagination {...defaultProps} totalPages={0} totalCount={0} />,
+        { wrapper: TestWrapper }
       );
       
       expect(container.firstChild).toBeNull();
     });
 
     it('renders page size selector with correct options', () => {
-      render(<Pagination {...defaultProps} />);
+      render(<Pagination {...defaultProps} />, { wrapper: TestWrapper });
       
       const select = screen.getByRole('combobox', { name: /select page size/i });
       expect(select).toBeInTheDocument();
@@ -70,13 +80,13 @@ describe('Pagination Component', () => {
     });
 
     it('displays correct page info for different page sizes', () => {
-      render(<Pagination {...defaultProps} currentPage={2} pageSize={25} totalCount={100} />);
+      render(<Pagination {...defaultProps} currentPage={2} pageSize={25} totalCount={100} />, { wrapper: TestWrapper });
       
       expect(screen.getByText(/showing 26-50 of 100 items/i)).toBeInTheDocument();
     });
 
     it('displays correct page info for last page', () => {
-      render(<Pagination {...defaultProps} currentPage={5} pageSize={10} totalCount={47} />);
+      render(<Pagination {...defaultProps} currentPage={5} pageSize={10} totalCount={47} />, { wrapper: TestWrapper });
       
       expect(screen.getByText(/showing 41-47 of 47 items/i)).toBeInTheDocument();
     });
@@ -84,7 +94,7 @@ describe('Pagination Component', () => {
 
   describe('Page Navigation', () => {
     it('renders page numbers correctly', () => {
-      render(<Pagination {...defaultProps} />);
+      render(<Pagination {...defaultProps} />, { wrapper: TestWrapper });
       
       expect(screen.getByRole('button', { name: /current page, page 1/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /go to page 2/i })).toBeInTheDocument();
@@ -94,7 +104,7 @@ describe('Pagination Component', () => {
     });
 
     it('highlights current page', () => {
-      render(<Pagination {...defaultProps} currentPage={3} />);
+      render(<Pagination {...defaultProps} currentPage={3} />, { wrapper: TestWrapper });
       
       const currentPageButton = screen.getByRole('button', { name: /current page, page 3/i });
       expect(currentPageButton).toHaveAttribute('aria-current', 'page');
@@ -102,14 +112,14 @@ describe('Pagination Component', () => {
     });
 
     it('disables previous button on first page', () => {
-      render(<Pagination {...defaultProps} currentPage={1} />);
+      render(<Pagination {...defaultProps} currentPage={1} />, { wrapper: TestWrapper });
       
       const prevButton = screen.getByRole('button', { name: /previous/i });
       expect(prevButton).toBeDisabled();
     });
 
     it('disables next button on last page', () => {
-      render(<Pagination {...defaultProps} currentPage={5} />);
+      render(<Pagination {...defaultProps} currentPage={5} />, { wrapper: TestWrapper });
       
       const nextButton = screen.getByRole('button', { name: /next/i });
       expect(nextButton).toBeDisabled();
@@ -117,7 +127,7 @@ describe('Pagination Component', () => {
 
     it('calls onPageChange when page number is clicked', () => {
       const onPageChange = vi.fn();
-      render(<Pagination {...defaultProps} onPageChange={onPageChange} />);
+      render(<Pagination {...defaultProps} onPageChange={onPageChange} />, { wrapper: TestWrapper });
       
       const page2Button = screen.getByRole('button', { name: /go to page 2/i });
       fireEvent.click(page2Button);
@@ -127,7 +137,7 @@ describe('Pagination Component', () => {
 
     it('calls onPageChange when previous button is clicked', () => {
       const onPageChange = vi.fn();
-      render(<Pagination {...defaultProps} currentPage={3} onPageChange={onPageChange} />);
+      render(<Pagination {...defaultProps} currentPage={3} onPageChange={onPageChange} />, { wrapper: TestWrapper });
       
       const prevButton = screen.getByRole('button', { name: /previous/i });
       fireEvent.click(prevButton);
@@ -137,7 +147,7 @@ describe('Pagination Component', () => {
 
     it('calls onPageChange when next button is clicked', () => {
       const onPageChange = vi.fn();
-      render(<Pagination {...defaultProps} currentPage={3} onPageChange={onPageChange} />);
+      render(<Pagination {...defaultProps} currentPage={3} onPageChange={onPageChange} />, { wrapper: TestWrapper });
       
       const nextButton = screen.getByRole('button', { name: /next/i });
       fireEvent.click(nextButton);
@@ -147,7 +157,7 @@ describe('Pagination Component', () => {
 
     it('does not call onPageChange for current page', () => {
       const onPageChange = vi.fn();
-      render(<Pagination {...defaultProps} onPageChange={onPageChange} />);
+      render(<Pagination {...defaultProps} onPageChange={onPageChange} />, { wrapper: TestWrapper });
       
       const currentPageButton = screen.getByRole('button', { name: /current page, page 1/i });
       fireEvent.click(currentPageButton);
@@ -159,7 +169,7 @@ describe('Pagination Component', () => {
   describe('Page Size Selection', () => {
     it('calls onPageSizeChange when page size is changed', () => {
       const onPageSizeChange = vi.fn();
-      render(<Pagination {...defaultProps} onPageSizeChange={onPageSizeChange} />);
+      render(<Pagination {...defaultProps} onPageSizeChange={onPageSizeChange} />, { wrapper: TestWrapper });
       
       const select = screen.getByRole('combobox', { name: /select page size/i });
       fireEvent.change(select, { target: { value: '25' } });
@@ -168,7 +178,7 @@ describe('Pagination Component', () => {
     });
 
     it('displays correct page size in selector', () => {
-      render(<Pagination {...defaultProps} pageSize={50} />);
+      render(<Pagination {...defaultProps} pageSize={50} />, { wrapper: TestWrapper });
       
       const select = screen.getByRole('combobox', { name: /select page size/i });
       expect(select.value).toBe('50');
@@ -177,7 +187,7 @@ describe('Pagination Component', () => {
 
   describe('Disabled State', () => {
     it('disables all controls when disabled prop is true', () => {
-      render(<Pagination {...defaultProps} disabled={true} />);
+      render(<Pagination {...defaultProps} disabled={true} />, { wrapper: TestWrapper });
       
       const select = screen.getByRole('combobox', { name: /select page size/i });
       const prevButton = screen.getByRole('button', { name: /previous/i });
@@ -211,13 +221,13 @@ describe('Pagination Component', () => {
     });
 
     it('handles large page numbers correctly', () => {
-      render(<Pagination {...defaultProps} currentPage={50} totalPages={100} pageSize={10} totalCount={1000} />);
+      render(<Pagination {...defaultProps} currentPage={50} totalPages={100} pageSize={10} totalCount={1000} />, { wrapper: TestWrapper });
       
       expect(screen.getByText(/showing 491-500 of 1000 items/i)).toBeInTheDocument();
     });
 
     it('handles page size larger than total count', () => {
-      render(<Pagination {...defaultProps} pageSize={100} totalCount={25} />);
+      render(<Pagination {...defaultProps} pageSize={100} totalCount={25} />, { wrapper: TestWrapper });
       
       expect(screen.getByText(/showing 1-25 of 25 items/i)).toBeInTheDocument();
     });
@@ -225,7 +235,7 @@ describe('Pagination Component', () => {
 
   describe('Accessibility', () => {
     it('has proper ARIA labels', () => {
-      render(<Pagination {...defaultProps} />);
+      render(<Pagination {...defaultProps} />, { wrapper: TestWrapper });
       
       expect(screen.getByRole('combobox', { name: /select page size/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /go to previous page/i })).toBeInTheDocument();
@@ -234,14 +244,14 @@ describe('Pagination Component', () => {
     });
 
     it('has aria-current on current page', () => {
-      render(<Pagination {...defaultProps} currentPage={3} />);
+      render(<Pagination {...defaultProps} currentPage={3} />, { wrapper: TestWrapper });
       
       const currentPageButton = screen.getByRole('button', { name: /current page, page 3 of 5/i });
       expect(currentPageButton).toHaveAttribute('aria-current', 'page');
     });
 
     it('has aria-live region for page info', () => {
-      render(<Pagination {...defaultProps} />);
+      render(<Pagination {...defaultProps} />, { wrapper: TestWrapper });
       
       const pageInfo = screen.getByText(/showing 1-10 of 50 items/i);
       expect(pageInfo).toHaveAttribute('aria-live', 'polite');
@@ -253,7 +263,7 @@ describe('Pagination Component', () => {
       // This would typically require a more sophisticated test setup
       // for testing responsive behavior, but we can at least verify
       // the component renders without errors
-      render(<Pagination {...defaultProps} />);
+      render(<Pagination {...defaultProps} />, { wrapper: TestWrapper });
       
       expect(screen.getByText('Items per page:')).toBeInTheDocument();
       expect(screen.getByText(/showing 1-10 of 50 items/i)).toBeInTheDocument();

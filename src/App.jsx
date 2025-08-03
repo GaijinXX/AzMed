@@ -1,119 +1,149 @@
-import React, { useState, useActionState, useOptimistic, useTransition, Suspense, useEffect } from 'react'
+import React, { useState, useActionState, useOptimistic, useTransition, Suspense, useEffect, useCallback } from 'react'
 import SearchBar from './components/SearchBar'
 import DrugTable from './components/DrugTable'
 import Pagination from './components/Pagination'
 import ResultsInfo from './components/ResultsInfo'
 import ColumnSelector from './components/ColumnSelector'
+import ShareButton from './components/ShareButton/ShareButton'
+import ThemeSelector from './components/ThemeSelector/ThemeSelector'
+import LanguageSelector from './components/LanguageSelector'
 import ErrorBoundary from './components/ErrorBoundary'
-import { 
-  SearchBarSkeleton, 
-  ResultsInfoSkeleton, 
-  TableSkeleton, 
+import {
+  SearchBarSkeleton,
+  ResultsInfoSkeleton,
+  TableSkeleton,
   PaginationSkeleton,
   ErrorState,
   EmptyState,
   InlineLoader
 } from './components/LoadingSkeletons/LoadingSkeletons'
-import { searchDrugs, getErrorMessage, ApiError } from './services/supabase'
+import { searchDrugs, getErrorMessage } from './services/supabase'
+import { getColumnLabel, getSortAnnouncement, validateSortColumn } from './components/DrugTable/sortConfig.js'
 import errorLogger from './services/errorLogger'
 import { useOptimizedUpdates, useOptimizedFetch, useCompilerOptimizations, useMemoryOptimization } from './hooks/useReact19Optimizations'
+import { useTranslation } from './hooks/useTranslation'
+import { useLanguageContext } from './contexts/LanguageContext'
+import { useURLState } from './hooks/useURLState'
+import { DEFAULT_VISIBLE_COLUMNS } from './utils/urlStateUtils.js'
 import performanceMonitor from './utils/performance'
 import { logPerformanceReport } from './utils/performanceAnalysis'
+
+
 import './App.css'
 
 function App() {
+  // Translation hook
+  const { t, currentLanguage } = useTranslation()
+  const { setLanguage } = useLanguageContext()
+
   // React 19 optimizations hooks
   const { batchUpdate, immediateUpdate, isPending: isUpdatePending } = useOptimizedUpdates()
-  const { trackRender, isCompilerActive } = useCompilerOptimizations()
+  const { trackRender } = useCompilerOptimizations()
   const { cleanup, trackMemoryUsage } = useMemoryOptimization()
 
   // Track component render for performance monitoring
   trackRender('App')
 
-  // Core state management using useState with automatic batching
-  const [drugs, setDrugs] = useState([])
-  const [searchText, setSearchText] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [totalCount, setTotalCount] = useState(0)
-  const [totalPages, setTotalPages] = useState(0)
-
-  // Column visibility state with localStorage persistence
-  const [visibleColumns, setVisibleColumns] = useState(() => {
-    try {
-      const saved = localStorage.getItem('azerbaijan-drug-db-columns')
-      return saved ? JSON.parse(saved) : {
-        number: true,
-        product_name: true,
-        active_ingredients: true,
-        dosage_amount: true,
-        dosage_form: true,
-        packaging_form: false,
-        amount: true,
-        manufacturer: false,
-        wholesale_price: false,
-        retail_price: true,
-        date: false
-      }
-    } catch {
-      return {
-        number: true,
-        product_name: true,
-        active_ingredients: true,
-        dosage_amount: true,
-        dosage_form: true,
-        packaging_form: false,
-        amount: true,
-        manufacturer: false,
-        wholesale_price: false,
-        retail_price: true,
-        date: false
-      }
+  // URL state management - replaces individual state variables
+  const {
+    urlState,
+    updateURL,
+    isURLLoading
+  } = useURLState({
+    searchText: '',
+    currentPage: 1,
+    pageSize: 10,
+    sortColumn: null,
+    sortDirection: 'asc',
+    visibleColumns: DEFAULT_VISIBLE_COLUMNS
+  }, {
+    enableHistory: true, // Explicitly enable history
+    onError: (error, context) => {
+      console.error('🚨 URL State Error:', error, context);
+      errorLogger.logError(error, {
+        type: 'URL_STATE_ERROR',
+        operation: context.operation,
+        ...context
+      });
     }
   })
 
+  // Extract URL state values for easier access
+  const {
+    searchText,
+    currentPage,
+    pageSize,
+    sortColumn,
+    sortDirection,
+    visibleColumns
+  } = urlState
+
+  // Core data state management (not URL-managed)
+  const [drugs, setDrugs] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [totalCount, setTotalCount] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  
+  // Temporary local page state for testing
+  const [localCurrentPage, setLocalCurrentPage] = useState(currentPage)
+  
+  // Local page size state for immediate UI updates
+  const [localPageSize, setLocalPageSize] = useState(pageSize)
+  
+  // Local search text state for immediate UI updates
+  const [currentSearchText, setCurrentSearchText] = useState(searchText)
+  
+  // Local visible columns state for immediate UI updates
+  const [currentVisibleColumns, setCurrentVisibleColumns] = useState(visibleColumns)
+  
+  // Local sort state for immediate UI updates
+  const [currentSortColumn, setCurrentSortColumn] = useState(sortColumn)
+  const [currentSortDirection, setCurrentSortDirection] = useState(sortDirection)
+  
   // useTransition for smooth page and search transitions
   const [isPending, startTransition] = useTransition()
 
   // useActionState for search form handling
-  const [searchState, searchAction, isSearchPending] = useActionState(
+  const [, , isSearchPending] = useActionState(
     async (prevState, formData) => {
       const newSearchText = formData?.get?.('search')?.toString() || ''
-      
+
       // Start transition for smooth UI updates
       startTransition(() => {
-        setSearchText(newSearchText)
-        setCurrentPage(1) // Reset to first page on new search
+        // Update URL state instead of non-existent functions
+        updateURL({
+          searchText: newSearchText,
+          currentPage: 1 // Reset to first page on new search
+        }, { immediate: true })
       })
 
       // Perform the actual search
-      await performSearch(newSearchText, 1, pageSize)
-      
+      await performSearch(newSearchText, 1, pageSize, currentSortColumn, currentSortDirection)
+
       return {
         ...prevState,
         searchText: newSearchText,
         lastSearched: Date.now()
       }
     },
-    { 
-      searchText: '', 
-      lastSearched: null 
+    {
+      searchText: '',
+      lastSearched: null
     }
   )
 
-  // useOptimistic for immediate UI feedback
+  // useOptimistic for immediate UI feedback (simplified - no pagination state)
   const [optimisticState, addOptimisticUpdate] = useOptimistic(
-    { 
-      drugs, 
-      searchText, 
-      currentPage, 
-      pageSize, 
-      totalCount, 
+    {
+      drugs,
+      searchText: currentSearchText,
+      totalCount,
       totalPages,
-      visibleColumns,
-      loading: loading || isPending || isSearchPending
+      visibleColumns: currentVisibleColumns,
+      sortColumn: currentSortColumn,
+      sortDirection: currentSortDirection,
+      loading: loading || isPending || isSearchPending || isURLLoading
     },
     (state, action) => {
       switch (action.type) {
@@ -121,20 +151,13 @@ function App() {
           return {
             ...state,
             searchText: action.searchText,
-            loading: true,
-            currentPage: 1
-          }
-        case 'PAGE_CHANGE':
-          return {
-            ...state,
-            currentPage: action.page,
             loading: true
           }
-        case 'PAGE_SIZE_CHANGE':
+        case 'SORT_CHANGE':
           return {
             ...state,
-            pageSize: action.pageSize,
-            currentPage: 1,
+            sortColumn: action.column,
+            sortDirection: action.direction,
             loading: true
           }
         default:
@@ -143,13 +166,77 @@ function App() {
     }
   )
 
+  // Keep local states in sync with URL state changes (for browser navigation)
+  useEffect(() => {
+    setCurrentSearchText(searchText)
+  }, [searchText])
+  
+  useEffect(() => {
+    setCurrentVisibleColumns(visibleColumns)
+  }, [visibleColumns])
+  
+  useEffect(() => {
+    setCurrentSortColumn(sortColumn)
+    setCurrentSortDirection(sortDirection)
+  }, [sortColumn, sortDirection])
+  
+  useEffect(() => {
+    setLocalCurrentPage(currentPage)
+  }, [currentPage])
+  
+  useEffect(() => {
+    setLocalPageSize(pageSize)
+  }, [pageSize])
+  
+  // Handle language from URL parameter (separate from main URL state)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const langParam = urlParams.get('lang');
+    
+    if (langParam && ['en', 'az', 'ru'].includes(langParam) && langParam !== currentLanguage) {
+      setLanguage(langParam);
+    }
+  }, []); // Only run once on mount
+  
+  // Update URL when language changes (without interfering with main URL state)
+  useEffect(() => {
+    // Only update URL if currentLanguage is properly initialized and not undefined
+    if (!currentLanguage || currentLanguage === 'undefined') {
+      return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentLangParam = urlParams.get('lang');
+    
+    if (currentLanguage !== 'en') {
+      // Add language parameter if not English
+      if (currentLangParam !== currentLanguage) {
+        urlParams.set('lang', currentLanguage);
+        const newURL = `${window.location.pathname}?${urlParams.toString()}`;
+        window.history.replaceState({}, '', newURL);
+      }
+    } else {
+      // Remove language parameter if English (default)
+      if (currentLangParam) {
+        urlParams.delete('lang');
+        const newURL = urlParams.toString() 
+          ? `${window.location.pathname}?${urlParams.toString()}`
+          : window.location.pathname;
+        window.history.replaceState({}, '', newURL);
+      }
+    }
+  }, [currentLanguage]);
+
+  // Note: Removed the problematic useEffect that was syncing optimistic state with URL state
+  // This was causing conflicts between URL state and optimistic state updates
+
   // Optimized fetch function using React 19 features
   const { fetch: optimizedSearchDrugs } = useOptimizedFetch(searchDrugs, [])
 
   // Core function to perform search with enhanced error handling and performance monitoring
-  const performSearch = async (searchTerm, page, size) => {
-    const measureId = `search-${searchTerm}-${page}-${size}`
-    performanceMonitor.startMeasure(measureId, { searchTerm, page, size })
+  const performSearch = async (searchTerm, page, size, orderBy = null, orderDir = 'asc') => {
+    const measureId = `search-${searchTerm}-${page}-${size}-${orderBy || 'none'}-${orderDir}`
+    performanceMonitor.startMeasure(measureId, { searchTerm, page, size, orderBy, orderDir })
 
     try {
       // Use immediate update for loading state (urgent)
@@ -158,36 +245,35 @@ function App() {
         setError(null)
       })
 
-      const response = await optimizedSearchDrugs(searchTerm, page, size)
-      
+      const response = await optimizedSearchDrugs(searchTerm, page, size, orderBy, orderDir)
+
       // Use batch update for all result state changes (React 19 automatic batching)
       batchUpdate(() => {
         setDrugs(response.data)
         setTotalCount(response.total_count)
         setTotalPages(response.total_pages)
-        setCurrentPage(response.page_number)
-        setPageSize(response.page_size)
+        // Note: currentPage and pageSize are now managed by URL state, not local state
       }, 'search-results-update')
-      
-      performanceMonitor.endMeasure(measureId, { 
-        success: true, 
+
+      performanceMonitor.endMeasure(measureId, {
+        success: true,
         resultCount: response.data.length,
-        totalCount: response.total_count 
+        totalCount: response.total_count
       })
-      
+
     } catch (err) {
       // Enhanced error logging with context
       const errorId = errorLogger.logApiError(err, {
         endpoint: 'database-search',
         method: 'POST',
-        parameters: { searchTerm, page, size },
+        parameters: { searchTerm, page, size, orderBy, orderDir },
         operation: 'performSearch'
       })
 
       console.error(`Search error [${errorId}]:`, err)
-      
+
       const userFriendlyMessage = getErrorMessage(err)
-      
+
       // Use batch update for error state
       batchUpdate(() => {
         setError(userFriendlyMessage)
@@ -196,9 +282,9 @@ function App() {
         setTotalPages(0)
       }, 'search-error-update')
 
-      performanceMonitor.endMeasure(measureId, { 
-        success: false, 
-        error: err.message 
+      performanceMonitor.endMeasure(measureId, {
+        success: false,
+        error: err.message
       })
     } finally {
       // Use immediate update for loading state
@@ -212,110 +298,239 @@ function App() {
 
   // Handle search with optimized React 19 updates
   const handleSearch = (newSearchText) => {
+    console.log('🔍 handleSearch called with:', newSearchText)
     performanceMonitor.measureConcurrentFeature('search-interaction', () => {
-      // Perform actual search in transition with optimistic update
-      startTransition(() => {
-        // Update the actual searchText state to ensure pagination uses correct term
-        setSearchText(newSearchText)
-        setCurrentPage(1) // Reset to first page on new search
-        
-        // Add optimistic update for immediate feedback inside transition
-        addOptimisticUpdate({
-          type: 'SEARCH_START',
-          searchText: newSearchText
-        })
-        
-        performSearch(newSearchText, 1, pageSize)
+      // Update local search text immediately for UI display
+      setCurrentSearchText(newSearchText)
+      
+      // Update local page state immediately to page 1 for new search
+      setLocalCurrentPage(1)
+      
+      // Add optimistic update for immediate feedback
+      addOptimisticUpdate({
+        type: 'SEARCH_START',
+        searchText: newSearchText
       })
+
+      // Update URL state hook - this will handle the browser URL update properly
+      updateURL({
+        searchText: newSearchText,
+        currentPage: 1 // Reset to first page on new search
+      }, { immediate: true })
+
+      // Perform search with new parameters - explicitly use page 1
+      performSearch(newSearchText, 1, pageSize, currentSortColumn, currentSortDirection)
     })
   }
 
   // Handle page change with optimized React 19 updates
   const handlePageChange = (newPage) => {
     performanceMonitor.measureConcurrentFeature('pagination-interaction', () => {
-      // Perform actual page change in transition with optimistic update
-      startTransition(() => {
-        // Add optimistic update for immediate feedback inside transition
-        addOptimisticUpdate({
-          type: 'PAGE_CHANGE',
-          page: newPage
-        })
-        
-        performSearch(searchText, newPage, pageSize)
-      })
+      // Update local page state immediately for UI
+      setLocalCurrentPage(newPage)
+      
+      // Update URL state hook - this will handle the browser URL update properly
+      updateURL({ currentPage: newPage }, { immediate: true })
+
+      // Perform search with new page - use currentSearchText (local state) instead of searchText (URL state)
+      // to ensure we use the most recent search text, even if URL state hasn't been updated yet
+      performSearch(currentSearchText, newPage, pageSize, currentSortColumn, currentSortDirection)
     })
   }
 
   // Handle page size change with optimized React 19 updates
   const handlePageSizeChange = (newPageSize) => {
     performanceMonitor.measureConcurrentFeature('page-size-interaction', () => {
-      // Perform actual page size change in transition with optimistic update
-      startTransition(() => {
-        // Add optimistic update for immediate feedback inside transition
-        addOptimisticUpdate({
-          type: 'PAGE_SIZE_CHANGE',
-          pageSize: newPageSize
-        })
-        
-        performSearch(searchText, 1, newPageSize)
-      })
+      // Update local states immediately for UI
+      setLocalCurrentPage(1) // Reset to first page when changing page size
+      setLocalPageSize(newPageSize) // Update local page size for immediate UI feedback
+      
+      // Update URL state hook with the new page size - this is crucial for proper state management
+      try {
+        updateURL({
+          pageSize: newPageSize,
+          currentPage: 1 // Reset to first page when changing page size
+        }, { immediate: true }) // Don't skip URL update - we need the page size in URL state
+      } catch (error) {
+        console.error('❌ Error updating state for page size:', error)
+      }
+
+      // Perform search with new page size - use currentSearchText (local state) for consistency
+      performSearch(currentSearchText, 1, newPageSize, currentSortColumn, currentSortDirection)
     })
   }
 
   // Enhanced retry functionality for failed API calls
   const handleRetry = () => {
     setError(null)
-    
+
     // Log retry attempt
     errorLogger.logError(new Error('User initiated retry'), {
       type: 'USER_RETRY',
       operation: 'handleRetry',
       searchTerm: searchText,
       currentPage,
-      pageSize
+      pageSize,
+      sortColumn,
+      sortDirection
     })
-    
+
     startTransition(() => {
-      performSearch(searchText, currentPage, pageSize)
+      performSearch(currentSearchText, currentPage, pageSize, currentSortColumn, currentSortDirection)
     })
   }
 
-  // Handle column visibility toggle with localStorage persistence
+  // Handle column sorting with optimized React 19 updates
+  const handleSort = useCallback((columnKey) => {
+    try {
+      // Validate column is sortable
+      if (!validateSortColumn(columnKey)) {
+        const errorMessage = `Column ${columnKey} is not sortable`
+        console.warn(errorMessage)
+        
+        // Log error for debugging
+        errorLogger.logError(new Error(errorMessage), {
+          type: 'SORT_VALIDATION_ERROR',
+          operation: 'handleSort',
+          columnKey,
+          availableColumns: Object.keys(currentVisibleColumns)
+        })
+        return
+      }
+
+      performanceMonitor.measureConcurrentFeature('column-sort', () => {
+        // Determine new sort direction using local state
+        const newDirection = (currentSortColumn === columnKey && currentSortDirection === 'asc') 
+          ? 'desc' 
+          : 'asc'
+        
+        // Update local sort state immediately for UI display
+        setCurrentSortColumn(columnKey)
+        setCurrentSortDirection(newDirection)
+        
+        // Update URL state immediately for sorting
+        updateURL({
+          sortColumn: columnKey,
+          sortDirection: newDirection,
+          currentPage: 1 // Reset to first page when sorting
+        }, { immediate: true })
+        
+        // Add optimistic update for immediate feedback
+        addOptimisticUpdate({
+          type: 'SORT_CHANGE',
+          column: columnKey,
+          direction: newDirection
+        })
+
+        // Perform search with new sort parameters - use currentSearchText (local state) for consistency
+        performSearch(currentSearchText, 1, pageSize, columnKey, newDirection)
+      })
+    } catch (error) {
+      // Handle sort errors gracefully
+      errorLogger.logError(error, {
+        type: 'SORT_ERROR',
+        operation: 'handleSort',
+        columnKey,
+        currentSort: { sortColumn: currentSortColumn, sortDirection: currentSortDirection }
+      })
+      
+      console.error('Sort operation failed:', error)
+      
+      // Show user-friendly error message
+      setError('Unable to sort by this column. Please try again.')
+    }
+  }, [validateSortColumn, performanceMonitor, currentSortColumn, currentSortDirection, updateURL, currentVisibleColumns])
+
+  // Handle column visibility toggle
   const handleColumnToggle = (columnKey) => {
     performanceMonitor.measureConcurrentFeature('column-toggle', () => {
-      startTransition(() => {
-        setVisibleColumns(prev => {
-          const newVisibleColumns = {
-            ...prev,
-            [columnKey]: !prev[columnKey]
-          }
-          
-          // Persist to localStorage
-          try {
-            localStorage.setItem('azerbaijan-drug-db-columns', JSON.stringify(newVisibleColumns))
-          } catch (err) {
-            console.warn('Failed to save column preferences:', err)
-          }
-          
-          return newVisibleColumns
-        })
+      const newVisibleColumns = {
+        ...currentVisibleColumns,
+        [columnKey]: !currentVisibleColumns[columnKey]
+      }
+
+      // Update local state immediately for UI display
+      setCurrentVisibleColumns(newVisibleColumns)
+
+      // If hiding the currently sorted column, reset sort
+      let updatedState = { visibleColumns: newVisibleColumns }
+      if (!newVisibleColumns[columnKey] && sortColumn === columnKey) {
+        updatedState.sortColumn = null
+        updatedState.sortDirection = 'asc'
+      }
+
+      // Update URL state hook (but don't update address bar)
+      updateURL(updatedState, { immediate: true })
+    })
+  }
+
+  // Handle bulk column operations
+  const handleShowAllColumns = () => {
+    performanceMonitor.measureConcurrentFeature('show-all-columns', () => {
+      // Get all available columns from the column definitions
+      const allColumns = [
+        'number', 'product_name', 'active_ingredients', 'dosage_amount', 
+        'dosage_form', 'packaging_form', 'amount', 'manufacturer', 
+        'wholesale_price', 'retail_price', 'date'
+      ]
+      
+      // Create new visible columns object with all columns visible
+      const newVisibleColumns = {}
+      allColumns.forEach(key => {
+        newVisibleColumns[key] = true
       })
+
+      // Update local state immediately for UI display
+      setCurrentVisibleColumns(newVisibleColumns)
+
+      // Update URL state hook (but don't update address bar)
+      updateURL({ visibleColumns: newVisibleColumns }, { immediate: true })
+    })
+  }
+
+  const handleHideOptionalColumns = () => {
+    performanceMonitor.measureConcurrentFeature('hide-optional-columns', () => {
+      // Only keep required columns visible (number and product_name)
+      const newVisibleColumns = {
+        number: true,
+        product_name: true,
+        active_ingredients: false,
+        dosage_amount: false,
+        dosage_form: false,
+        packaging_form: false,
+        amount: false,
+        manufacturer: false,
+        wholesale_price: false,
+        retail_price: false,
+        date: false
+      }
+
+      // Update local state immediately for UI display
+      setCurrentVisibleColumns(newVisibleColumns)
+
+      // If hiding the currently sorted column, reset sort
+      let updatedState = { visibleColumns: newVisibleColumns }
+      if (!newVisibleColumns[sortColumn] && sortColumn) {
+        updatedState.sortColumn = null
+        updatedState.sortDirection = 'asc'
+      }
+
+      // Update URL state hook (but don't update address bar)
+      updateURL(updatedState, { immediate: true })
     })
   }
 
   // Initial data loading on application startup with performance monitoring
   useEffect(() => {
     performanceMonitor.measureConcurrentFeature('initial-load', () => {
-      // Set the initial search text to match what we're searching for
-      setSearchText('%')
-      // Load all drugs using SQL wildcard (%)
-      performSearch('%', 1, 10)
+      // Always load data with current URL state (including empty search to show all items)
+      performSearch(searchText, currentPage, pageSize, currentSortColumn, currentSortDirection)
     })
 
     // Track memory usage in development
     if (process.env.NODE_ENV === 'development') {
       trackMemoryUsage()
-      
+
       // Generate performance report after initial load
       setTimeout(() => {
         logPerformanceReport()
@@ -324,24 +539,24 @@ function App() {
 
     // Cleanup function for component unmount
     return cleanup
-  }, [cleanup, trackMemoryUsage])
+  }, [cleanup, trackMemoryUsage]) // Only run once on mount
 
   // Determine current loading state with React 19 optimizations
-  const isLoading = optimisticState.loading || isUpdatePending
+  const isLoading = optimisticState.loading || isUpdatePending || isURLLoading
 
   return (
     <ErrorBoundary
       fallback={({ onRetry }) => (
         <div className="App">
           <header className="App-header" role="banner">
-            <h1>Azerbaijan Drug Database</h1>
-            <p>Search and browse all officially registered drugs in Azerbaijan</p>
+            <h1>{t('header.title')}</h1>
+            <p>{t('header.subtitle')}</p>
           </header>
           <main id="main-content" className="App-main" role="main" tabIndex="-1">
             <ErrorState
-              message="The application encountered an unexpected error and couldn't continue."
+              message={t('errors.loadingFailed')}
               onRetry={onRetry}
-              retryText="Try Again"
+              retryText={t('common.retry')}
               showRefresh={true}
             />
           </main>
@@ -349,33 +564,62 @@ function App() {
       )}
     >
       <div className="App">
+        <div className="mobile-theme-selector">
+          <LanguageSelector />
+          <ThemeSelector />
+        </div>
         <header className="App-header" role="banner">
-          <h1>Azerbaijan Drug Database</h1>
-          <p>Search and browse all officially registered drugs in Azerbaijan</p>
+          <div className="header-content">
+            <div className="header-text">
+              <h1>{t('header.title')}</h1>
+              <p>{t('header.subtitle')}</p>
+            </div>
+            <div className="header-controls">
+              <LanguageSelector />
+              <ThemeSelector />
+            </div>
+          </div>
         </header>
 
         <main id="main-content" className="App-main" role="main" tabIndex="-1">
           {/* Live region for screen reader announcements */}
-          <div 
-            id="search-status" 
-            className="visually-hidden" 
-            role="status" 
-            aria-live="polite" 
+          <div
+            id="search-status"
+            className="visually-hidden"
+            role="status"
+            aria-live="polite"
             aria-atomic="true"
           >
-            {isLoading ? 'Searching for drugs...' : 
-             error ? `Error: ${error}` :
-             optimisticState.totalCount > 0 ? `Found ${optimisticState.totalCount} drugs` :
-             'No drugs found'}
+            {isLoading ? t('common.loading') :
+              error ? `${t('common.error')}: ${error}` :
+                optimisticState.totalCount > 0 ? `${t('search.resultsFound', 'Found')} ${optimisticState.totalCount} ${t('search.resultsFound', 'drugs')}` :
+                  t('search.noResults')}
+          </div>
+
+          {/* Live region for sort announcements */}
+          <div
+            id="sort-status"
+            className="visually-hidden"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {optimisticState.sortColumn && (
+              getSortAnnouncement(
+                getColumnLabel(optimisticState.sortColumn, t), 
+                optimisticState.sortDirection,
+                t
+              )
+            )}
           </div>
 
           <section aria-labelledby="search-heading">
-            <h2 id="search-heading" className="visually-hidden">Search Drugs</h2>
+            <h2 id="search-heading" className="visually-hidden">{t('search.ariaLabel', 'Search Drugs')}</h2>
             <Suspense fallback={<SearchBarSkeleton />}>
-              <SearchBar 
+              <SearchBar
                 onSearch={handleSearch}
-                initialValue={optimisticState.searchText}
-                placeholder="Search for drugs by name or active ingredient..."
+                initialValue={currentSearchText}
+                placeholder={t('search.placeholder')}
                 disabled={isLoading}
                 aria-describedby="search-status"
               />
@@ -394,61 +638,76 @@ function App() {
           {!error && (
             <>
               <section aria-labelledby="results-heading">
-                <h2 id="results-heading" className="visually-hidden">Search Results</h2>
-                <div className="results-header">
-                  <Suspense fallback={<ResultsInfoSkeleton />}>
-                    <ResultsInfo
-                      totalCount={optimisticState.totalCount}
-                      currentPage={optimisticState.currentPage}
-                      pageSize={optimisticState.pageSize}
-                      searchText={optimisticState.searchText}
-                      loading={isLoading}
-                    />
-                  </Suspense>
-                  {/* Column Selector moved from table to results header */}
-                  {(optimisticState.drugs.length > 0 || isLoading) && (
+                <h2 id="results-heading" className="visually-hidden">{t('search.resultsFound', 'Search Results')}</h2>
+                {(optimisticState.drugs.length > 0 || isLoading) && (
+                  <div className="results-header">
+                    <div className="results-info-container">
+                      <Suspense fallback={<ResultsInfoSkeleton />}>
+                        <ResultsInfo
+                          totalCount={totalCount}
+                          currentPage={localCurrentPage}
+                          pageSize={localPageSize}
+                          searchText={currentSearchText}
+                          loading={isLoading}
+                        />
+                      </Suspense>
+                      {/* Share Button next to results info */}
+                      <ShareButton
+                        searchText={currentSearchText}
+                        currentPage={localCurrentPage}
+                        pageSize={pageSize}
+                        sortColumn={sortColumn}
+                        sortDirection={sortDirection}
+                        visibleColumns={currentVisibleColumns}
+                        currentLanguage={currentLanguage}
+                        disabled={isLoading}
+                      />
+                    </div>
+                    {/* Column Selector on the right */}
                     <ColumnSelector
                       columns={[
-                        { key: 'number', label: 'Registration #', required: true },
-                        { key: 'product_name', label: 'Product Name', required: true },
-                        { key: 'active_ingredients', label: 'Active Ingredients', required: false },
-                        { key: 'dosage_amount', label: 'Dosage Amount', required: false },
-                        { key: 'dosage_form', label: 'Dosage Form', required: false },
-                        { key: 'packaging_form', label: 'Packaging Form', required: false },
-                        { key: 'amount', label: 'Package Amount', required: false },
-                        { key: 'manufacturer', label: 'Manufacturer', required: false },
-                        { key: 'wholesale_price', label: 'Wholesale Price', required: false },
-                        { key: 'retail_price', label: 'Retail Price', required: false },
-                        { key: 'date', label: 'Registration Date', required: false }
+                        { key: 'number', label: t('table.headers.number'), required: true },
+                        { key: 'product_name', label: t('table.headers.product_name'), required: true },
+                        { key: 'active_ingredients', label: t('table.headers.active_ingredients'), required: false },
+                        { key: 'dosage_amount', label: t('table.headers.dosage_amount'), required: false },
+                        { key: 'dosage_form', label: t('table.headers.dosage_form'), required: false },
+                        { key: 'packaging_form', label: t('table.headers.packaging_form'), required: false },
+                        { key: 'amount', label: t('table.headers.amount'), required: false },
+                        { key: 'manufacturer', label: t('table.headers.manufacturer'), required: false },
+                        { key: 'wholesale_price', label: t('table.headers.wholesale_price'), required: false },
+                        { key: 'retail_price', label: t('table.headers.retail_price'), required: false },
+                        { key: 'date', label: t('table.headers.registration_date'), required: false }
                       ]}
-                      visibleColumns={optimisticState.visibleColumns}
+                      visibleColumns={currentVisibleColumns}
                       onColumnToggle={handleColumnToggle}
+                      onShowAll={handleShowAllColumns}
+                      onHideOptional={handleHideOptionalColumns}
                       disabled={isLoading}
                     />
-                  )}
-                </div>
+                  </div>
+                )}
               </section>
 
               {/* Show empty state when no results */}
               {!isLoading && optimisticState.drugs.length === 0 && optimisticState.totalCount === 0 && (
                 <EmptyState
                   message={
-                    optimisticState.searchText && optimisticState.searchText !== '%' 
-                      ? "No drugs found" 
-                      : "No drugs available"
+                    currentSearchText && currentSearchText !== ''
+                      ? `${t('results.noResultsFound')} "${currentSearchText}"`
+                      : t('table.noData')
                   }
                   description={
-                    optimisticState.searchText && optimisticState.searchText !== '%'
-                      ? `No results found for "${optimisticState.searchText}". Try a different search term or browse all drugs.`
-                      : "The database appears to be empty or there was an issue loading the drugs. Try refreshing or contact support."
+                    currentSearchText && currentSearchText !== ''
+                      ? t('table.noResults')
+                      : t('errors.loadingFailed')
                   }
                   action={
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                      <button 
-                        onClick={() => handleSearch('%')}
+                      <button
+                        onClick={() => handleSearch('')}
                         className="retry-button"
                       >
-                        Show All Drugs
+                        {t('search.showAllDrugs')}
                       </button>
                     </div>
                   }
@@ -459,15 +718,18 @@ function App() {
               {(optimisticState.drugs.length > 0 || isLoading) && (
                 <section aria-labelledby="drugs-table-heading">
                   <h2 id="drugs-table-heading" className="visually-hidden">
-                    Drug Information Table
+                    {t('table.headers.product_name', 'Drug Information Table')}
                   </h2>
-                  <Suspense fallback={<TableSkeleton rows={optimisticState.pageSize} />}>
+                  <Suspense fallback={<TableSkeleton rows={localPageSize} />}>
                     <DrugTable
                       drugs={optimisticState.drugs}
                       loading={isLoading}
                       isPending={isPending || isSearchPending}
-                      visibleColumns={optimisticState.visibleColumns}
+                      visibleColumns={currentVisibleColumns}
                       onColumnToggle={handleColumnToggle}
+                      sortColumn={optimisticState.sortColumn}
+                      sortDirection={optimisticState.sortDirection}
+                      onSort={handleSort}
                       aria-describedby="search-status"
                     />
                   </Suspense>
@@ -475,17 +737,17 @@ function App() {
               )}
 
               {/* Show pagination when we have multiple pages */}
-              {optimisticState.totalPages > 1 && (
+              {totalPages > 1 && (
                 <nav aria-labelledby="pagination-heading" role="navigation">
                   <h2 id="pagination-heading" className="visually-hidden">
-                    Page Navigation
+                    {t('pagination.page', 'Page Navigation')}
                   </h2>
                   <Suspense fallback={<PaginationSkeleton />}>
                     <Pagination
-                      currentPage={optimisticState.currentPage}
-                      totalPages={optimisticState.totalPages}
-                      pageSize={optimisticState.pageSize}
-                      totalCount={optimisticState.totalCount}
+                      currentPage={localCurrentPage}
+                      totalPages={totalPages}
+                      pageSize={localPageSize}
+                      totalCount={totalCount}
                       onPageChange={handlePageChange}
                       onPageSizeChange={handlePageSizeChange}
                       disabled={isLoading}
@@ -498,13 +760,14 @@ function App() {
               {/* Show loading indicator for pending operations */}
               {(isPending || isSearchPending) && !isLoading && (
                 <div className="pending-indicator">
-                  <InlineLoader text="Updating..." />
+                  <InlineLoader text={t('common.loading')} />
                 </div>
               )}
             </>
           )}
         </main>
       </div>
+
     </ErrorBoundary>
   )
 }

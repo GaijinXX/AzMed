@@ -1,22 +1,11 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, memo, useCallback } from 'react';
 import DrugRow from './DrugRow';
+import SortableColumnHeader from './SortableColumnHeader';
+import { SORTABLE_COLUMNS } from './sortConfig';
 import { useOptimizedList, useCompilerOptimizations } from '../../hooks/useReact19Optimizations';
+import { useTranslation } from '../../hooks/useTranslation';
 import styles from './DrugTable.module.css';
 
-// Define available columns
-const AVAILABLE_COLUMNS = [
-  { key: 'number', label: 'Registration #', required: true },
-  { key: 'product_name', label: 'Product Name', required: true },
-  { key: 'active_ingredients', label: 'Active Ingredients', required: false },
-  { key: 'dosage_amount', label: 'Dosage Amount', required: false },
-  { key: 'dosage_form', label: 'Dosage Form', required: false },
-  { key: 'packaging_form', label: 'Packaging Form', required: false },
-  { key: 'amount', label: 'Package Amount', required: false },
-  { key: 'manufacturer', label: 'Manufacturer', required: false },
-  { key: 'wholesale_price', label: 'Wholesale Price', required: false },
-  { key: 'retail_price', label: 'Retail Price', required: false },
-  { key: 'date', label: 'Registration Date', required: false }
-];
 
 // Default visible columns
 const DEFAULT_VISIBLE_COLUMNS = {
@@ -44,11 +33,17 @@ function DrugTable({
   isPending = false,
   'aria-describedby': ariaDescribedBy,
   visibleColumns = DEFAULT_VISIBLE_COLUMNS,
-  onColumnToggle
+  onColumnToggle,
+  sortColumn = null,
+  sortDirection = 'asc',
+  onSort
 }) {
   // Track component render performance
   const { trackRender } = useCompilerOptimizations();
   trackRender('DrugTable');
+
+  // Get translations
+  const { t } = useTranslation();
 
   // Use optimized list rendering for large datasets (only if we have drugs)
   const optimizedList = useOptimizedList(drugs || [], {
@@ -58,13 +53,17 @@ function DrugTable({
   });
 
   if (loading) {
-    return <TableSkeleton visibleColumns={visibleColumns} />;
+    return <TableSkeleton 
+      visibleColumns={visibleColumns} 
+      sortColumn={sortColumn}
+      sortDirection={sortDirection}
+    />;
   }
 
   if (!drugs || drugs.length === 0) {
     return (
       <div className={styles.emptyState} role="status" aria-live="polite">
-        <p>No drugs found. Try adjusting your search criteria.</p>
+        <p>{t('table.noResults')}</p>
       </div>
     );
   }
@@ -74,16 +73,22 @@ function DrugTable({
       <div 
         className={styles.tableWrapper}
         role="region"
-        aria-label="Drug information table"
+        aria-label={t('table.tableLabel')}
         tabIndex="0"
       >
         <table 
           className={styles.table} 
           role="table"
-          aria-label={`Drug information table with ${drugs.length} entries`}
+          aria-label={`${t('table.tableLabel')} ${t('pagination.with')} ${drugs.length} ${t('pagination.entries')}`}
           aria-describedby={ariaDescribedBy}
         >
-          <TableHeader visibleColumns={visibleColumns} />
+          <TableHeader 
+            visibleColumns={visibleColumns}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            disabled={loading || isPending}
+          />
           <Suspense fallback={<TableBodySkeleton visibleColumns={visibleColumns} />}>
             <TableBody 
               drugs={drugs} 
@@ -97,75 +102,33 @@ function DrugTable({
       
       {/* Screen reader summary */}
       <div className="visually-hidden" aria-live="polite">
-        Table showing {drugs.length} drug{drugs.length !== 1 ? 's' : ''} with registration information, pricing, and manufacturer details.
+        {t('table.tableSummary')} {drugs.length} {drugs.length !== 1 ? t('pagination.entries') : t('pagination.entry')}.
+        {sortColumn && ` ${t('table.tableSorted')} ${t(`table.headers.${sortColumn}`)} ${t('table.inOrder')} ${sortDirection === 'asc' ? t('table.ascending') : t('table.descending')}.`}
       </div>
     </div>
   );
 }
 
 /**
- * Table header component with proper semantic structure
+ * Table header component with sortable column headers
  * React Compiler will automatically optimize this component
  */
-function TableHeader({ visibleColumns }) {
+function TableHeader({ visibleColumns, sortColumn, sortDirection, onSort, disabled = false }) {
   return (
     <thead className={styles.tableHeader} role="rowgroup">
       <tr role="row">
-        {visibleColumns.number && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            <abbr title="Registration Number">#</abbr>
-          </th>
-        )}
-        {visibleColumns.product_name && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            Product Name
-          </th>
-        )}
-        {visibleColumns.active_ingredients && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            Active Ingredients
-          </th>
-        )}
-        {visibleColumns.dosage_amount && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            Dosage Amount
-          </th>
-        )}
-        {visibleColumns.dosage_form && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            Dosage Form
-          </th>
-        )}
-        {visibleColumns.packaging_form && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            Packaging Form
-          </th>
-        )}
-        {visibleColumns.amount && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            Package Amount
-          </th>
-        )}
-        {visibleColumns.manufacturer && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            Manufacturer
-          </th>
-        )}
-        {visibleColumns.wholesale_price && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            <abbr title="Wholesale Price in Azerbaijan Manat">Wholesale Price (₼)</abbr>
-          </th>
-        )}
-        {visibleColumns.retail_price && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            <abbr title="Retail Price in Azerbaijan Manat">Retail Price (₼)</abbr>
-          </th>
-        )}
-        {visibleColumns.date && (
-          <th scope="col" className={styles.headerCell} aria-sort="none">
-            Registration Date
-          </th>
-        )}
+        {SORTABLE_COLUMNS.map(column => (
+          <SortableColumnHeader
+            key={column.key}
+            column={column}
+            isVisible={visibleColumns[column.key]}
+            isSorted={sortColumn === column.key}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            disabled={disabled}
+            className={styles.headerCell}
+          />
+        ))}
       </tr>
     </thead>
   );
@@ -176,13 +139,14 @@ function TableHeader({ visibleColumns }) {
  * React Compiler will automatically memoize this component
  */
 function TableBody({ drugs, isPending, visibleColumns, totalItems }) {
+  const { t } = useTranslation();
 
   return (
     <tbody 
       className={`${styles.tableBody} ${isPending ? styles.pending : ''}`}
       role="rowgroup"
       aria-live={isPending ? "polite" : "off"}
-      aria-label={`Table body showing ${drugs.length} of ${totalItems} drugs`}
+      aria-label={`${t('table.tableBody')} ${drugs.length} ${t('pagination.of')} ${totalItems} ${t('pagination.entries')}`}
     >
       {drugs.map((drug, index) => (
         <DrugRow 
@@ -200,12 +164,18 @@ function TableBody({ drugs, isPending, visibleColumns, totalItems }) {
 /**
  * Loading skeleton for the entire table
  */
-function TableSkeleton({ visibleColumns = DEFAULT_VISIBLE_COLUMNS }) {
+function TableSkeleton({ visibleColumns = DEFAULT_VISIBLE_COLUMNS, sortColumn = null, sortDirection = 'asc' }) {
   return (
     <div className={styles.tableContainer}>
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
-          <TableHeader visibleColumns={visibleColumns} />
+          <TableHeader 
+            visibleColumns={visibleColumns}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={() => {}} // No-op for skeleton
+            disabled={true}
+          />
           <TableBodySkeleton visibleColumns={visibleColumns} />
         </table>
       </div>

@@ -26,7 +26,7 @@ This feature involves creating a simple, public React-based frontend interface f
 
 #### Acceptance Criteria
 
-1. WHEN search results are displayed THEN the system SHALL show each drug's registration number, product name, active ingredients, dosage amount, dosage form, packaging form, amount, manufacturer, wholesale price, retail price, and date
+1. WHEN search results are displayed THEN the system SHALL show each drug's registration number, product name, active ingredients, dosage, formulation, packaging form, amount, manufacturer, wholesale price, retail price, and date
 2. WHEN displaying prices THEN the system SHALL convert the stored price values to AZN format by dividing by 100 (e.g., 5789 displays as ₼57.89, 678 displays as ₼6.78)
 3. WHEN displaying prices THEN the system SHALL format them with the manat symbol (₼) and two decimal places
 4. WHEN displaying active ingredients THEN the system SHALL handle long ingredient lists appropriately with proper text wrapping or truncation

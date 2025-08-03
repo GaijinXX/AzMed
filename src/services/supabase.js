@@ -8,7 +8,13 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Debug function for testing Supabase function directly (available in browser console)
-window.testSupabaseFunction = async (searchTerm = '%', pageNumber = 1, pageSize = 10) => {
+window.testSupabaseFunction = async (
+  searchTerm = '%', 
+  pageNumber = 1, 
+  pageSize = 10, 
+  orderBy = null, 
+  orderDirection = 'asc'
+) => {
   console.log('🧪 Testing Supabase function directly...')
 
   try {
@@ -16,6 +22,12 @@ window.testSupabaseFunction = async (searchTerm = '%', pageNumber = 1, pageSize 
       p_search_term: searchTerm.trim(),
       p_page_number: pageNumber,
       p_page_size: pageSize
+    }
+
+    // Add sort parameters if provided
+    if (orderBy) {
+      requestBody.p_order_by = orderBy
+      requestBody.p_order_dir = orderDirection
     }
 
     console.log('📤 Request:', requestBody)
@@ -193,8 +205,14 @@ const parseApiResponse = (response, searchTerm = '', pageNumber = 1, pageSize = 
   return normalizedResponse
 }
 
-// Main API function for searching drugs with server-side pagination
-export const searchDrugs = async (searchTerm = '', pageNumber = 1, pageSize = 10) => {
+// Main API function for searching drugs with server-side pagination and sorting
+export const searchDrugs = async (
+  searchTerm = '', 
+  pageNumber = 1, 
+  pageSize = 10,
+  orderBy = null,
+  orderDirection = 'asc'
+) => {
   try {
     // Validate input parameters
     if (typeof searchTerm !== 'string') {
@@ -206,6 +224,12 @@ export const searchDrugs = async (searchTerm = '', pageNumber = 1, pageSize = 10
     if (typeof pageSize !== 'number' || pageSize < 1 || pageSize > 100) {
       throw new ApiError('Page size must be between 1 and 100', API_ERRORS.INVALID_RESPONSE)
     }
+    if (orderBy && typeof orderBy !== 'string') {
+      throw new ApiError('Order by column must be a string', API_ERRORS.INVALID_RESPONSE)
+    }
+    if (orderDirection && !['asc', 'desc'].includes(orderDirection.toLowerCase())) {
+      throw new ApiError('Order direction must be "asc" or "desc"', API_ERRORS.INVALID_RESPONSE)
+    }
 
     // Prepare request body - ensure search term is not empty
     const processedSearchTerm = searchTerm.trim() || '%'
@@ -213,6 +237,12 @@ export const searchDrugs = async (searchTerm = '', pageNumber = 1, pageSize = 10
       p_search_term: processedSearchTerm,
       p_page_number: pageNumber,
       p_page_size: pageSize
+    }
+
+    // Add sort parameters if provided
+    if (orderBy) {
+      requestBody.p_order_by = orderBy
+      requestBody.p_order_dir = orderDirection.toLowerCase()
     }
 
     // Make API call with timeout
@@ -278,8 +308,8 @@ export const searchDrugs = async (searchTerm = '', pageNumber = 1, pageSize = 10
 }
 
 // Convenience function to get all drugs (empty search)
-export const getAllDrugs = async (pageNumber = 1, pageSize = 10) => {
-  return searchDrugs('', pageNumber, pageSize)
+export const getAllDrugs = async (pageNumber = 1, pageSize = 10, orderBy = null, orderDirection = 'asc') => {
+  return searchDrugs('', pageNumber, pageSize, orderBy, orderDirection)
 }
 
 // Function to get user-friendly error messages

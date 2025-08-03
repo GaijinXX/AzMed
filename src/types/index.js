@@ -3,10 +3,10 @@
  * @property {number} number - Registration number
  * @property {string} product_name - Product name
  * @property {string} active_ingredients - Active ingredients (comma-separated)
- * @property {string} dosage_amount - Dosage amount with units
- * @property {string} dosage_form - Form (tablet, injection, etc.)
+ * @property {string} dosage_amount - Dosage with units
+ * @property {string} dosage_form - Formulation (tablet, injection, etc.)
  * @property {string} packaging_form - Packaging description
- * @property {string} amount - Package amount
+ * @property {string} amount - Amount
  * @property {string} manufacturer - Manufacturer name and country
  * @property {number} wholesale_price - Price in qəpik (1/100 AZN)
  * @property {number} retail_price - Price in qəpik (1/100 AZN)

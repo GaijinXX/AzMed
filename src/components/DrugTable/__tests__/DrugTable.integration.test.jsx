@@ -111,7 +111,7 @@ describe('DrugTable Column Visibility Integration', () => {
 
     // Should not show headers for hidden columns
     expect(screen.queryByText('Active Ingredients')).not.toBeInTheDocument();
-    expect(screen.queryByText('Dosage Amount')).not.toBeInTheDocument();
+    expect(screen.queryByText('Dosage')).not.toBeInTheDocument();
     expect(screen.queryByText('Manufacturer')).not.toBeInTheDocument();
 
     // Should only show data for visible columns
