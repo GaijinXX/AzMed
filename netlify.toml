@@ -1,0 +1,83 @@
+# Netlify deployment configuration for Azerbaijan Drug Database
+
+[build]
+  # Build command
+  command = "npm run build:prod"
+  
+  # Directory to publish
+  publish = "dist"
+  
+  # Environment variables for build
+  environment = { NODE_ENV = "production" }
+
+[build.environment]
+  # Node.js version
+  NODE_VERSION = "18"
+  
+  # NPM version
+  NPM_VERSION = "9"
+
+# Production deployment settings
+[context.production]
+  command = "npm run build:prod"
+  environment = { NODE_ENV = "production" }
+
+# Staging deployment settings  
+[context.deploy-preview]
+  command = "npm run build:staging"
+  environment = { NODE_ENV = "production" }
+
+# Branch deployment settings
+[context.branch-deploy]
+  command = "npm run build:dev"
+  environment = { NODE_ENV = "development" }
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    
+    # Performance headers
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache HTML with shorter duration
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# SPA redirect rules
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Optimize build performance
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true

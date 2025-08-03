@@ -18,6 +18,7 @@ import {
   InlineLoader
 } from './components/LoadingSkeletons/LoadingSkeletons'
 import { searchDrugs, getErrorMessage } from './services/supabase'
+import { initializeMonitoring, trackPageView, trackEvent } from './utils/monitoring'
 import { getColumnLabel, getSortAnnouncement, validateSortColumn } from './components/DrugTable/sortConfig.js'
 import errorLogger from './services/errorLogger'
 import { useOptimizedUpdates, useOptimizedFetch, useCompilerOptimizations, useMemoryOptimization } from './hooks/useReact19Optimizations'
@@ -522,6 +523,12 @@ function App() {
 
   // Initial data loading on application startup with performance monitoring
   useEffect(() => {
+    // Initialize monitoring services
+    initializeMonitoring()
+    
+    // Track initial page view
+    trackPageView(window.location.pathname)
+    
     performanceMonitor.measureConcurrentFeature('initial-load', () => {
       // Always load data with current URL state (including empty search to show all items)
       performSearch(searchText, currentPage, pageSize, currentSortColumn, currentSortDirection)

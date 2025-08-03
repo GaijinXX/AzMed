@@ -2,9 +2,43 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/pill.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="/pill.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="192x192" href="/pill-192.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="512x512" href="/pill-512.svg" />
+    <link rel="apple-touch-icon" href="/pill-192.svg" />
+    <link rel="mask-icon" href="/pill.svg" color="#f44336" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Official database of all drugs available in Azerbaijan. Search, filter, and explore pharmaceutical information." />
+    <meta name="keywords" content="Azerbaijan, drugs, pharmacy, medicine, database, pharmaceutical" />
+    <meta name="author" content="Azerbaijan Drug Database" />
+    <meta name="theme-color" content="#f44336" />
+    <link rel="manifest" href="/manifest.json" />
     <title>Azerbaijan Drug Database</title>
+    
+    <!-- GitHub Pages SPA routing support -->
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // MIT License
+      // https://github.com/rafgraph/spa-github-pages
+      // This script checks to see if a redirect is present in the query string,
+      // converts it back into the correct url and adds it to the
+      // browser's history using window.history.replaceState(...),
+      // which won't cause the browser to attempt to load the new url.
+      // When the single page app is loaded further down in this file,
+      // the correct url will be waiting in the browser's history for
+      // the single page app to route accordingly.
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
   </head>
   <body>
     <div id="root"></div>
