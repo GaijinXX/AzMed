@@ -1,4 +1,4 @@
-import React, { useState, useActionState, useOptimistic, useTransition, Suspense, useEffect, useCallback } from 'react'
+import React, { useState, useActionState, useOptimistic, useTransition, Suspense, useEffect, useCallback, useRef } from 'react'
 import SearchBar from './components/SearchBar'
 import DrugTable from './components/DrugTable'
 import Pagination from './components/Pagination'
@@ -197,7 +197,7 @@ function App() {
     if (langParam && ['en', 'az', 'ru'].includes(langParam) && langParam !== currentLanguage) {
       setLanguage(langParam);
     }
-  }, [currentLanguage, setLanguage]); // Include dependencies
+  }, []); // Remove currentLanguage dependency to prevent loops
   
   // Update URL when language changes (without interfering with main URL state)
   useEffect(() => {
@@ -206,26 +206,35 @@ function App() {
       return;
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentLangParam = urlParams.get('lang');
-    
-    if (currentLanguage !== 'en') {
-      // Add language parameter if not English
-      if (currentLangParam !== currentLanguage) {
-        urlParams.set('lang', currentLanguage);
-        const newURL = `${window.location.pathname}?${urlParams.toString()}`;
-        window.history.replaceState({}, '', newURL);
+    // Debounce URL updates to prevent rapid-fire calls
+    const timeoutId = setTimeout(() => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentLangParam = urlParams.get('lang');
+        
+        if (currentLanguage !== 'en') {
+          // Add language parameter if not English
+          if (currentLangParam !== currentLanguage) {
+            urlParams.set('lang', currentLanguage);
+            const newURL = `${window.location.pathname}?${urlParams.toString()}`;
+            window.history.replaceState({}, '', newURL);
+          }
+        } else {
+          // Remove language parameter if English (default)
+          if (currentLangParam) {
+            urlParams.delete('lang');
+            const newURL = urlParams.toString() 
+              ? `${window.location.pathname}?${urlParams.toString()}`
+              : window.location.pathname;
+            window.history.replaceState({}, '', newURL);
+          }
+        }
+      } catch (error) {
+        console.error('Error updating URL for language change:', error);
       }
-    } else {
-      // Remove language parameter if English (default)
-      if (currentLangParam) {
-        urlParams.delete('lang');
-        const newURL = urlParams.toString() 
-          ? `${window.location.pathname}?${urlParams.toString()}`
-          : window.location.pathname;
-        window.history.replaceState({}, '', newURL);
-      }
-    }
+    }, 100); // 100ms debounce to prevent rapid calls
+
+    return () => clearTimeout(timeoutId);
   }, [currentLanguage]);
 
   // Note: Removed the problematic useEffect that was syncing optimistic state with URL state

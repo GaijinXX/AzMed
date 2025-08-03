@@ -75,6 +75,11 @@ export const LanguageProvider = ({ children }) => {
         return false;
       }
 
+      // Prevent unnecessary updates if already set to this language
+      if (currentLanguage === languageCode) {
+        return true;
+      }
+
       // Use React 19 concurrent features for smooth language switching
       startTransition(() => {
         batchUpdate(() => {
@@ -87,7 +92,12 @@ export const LanguageProvider = ({ children }) => {
       });
       
       // Persist to localStorage (immediate, not in transition)
-      localStorage.setItem(LANGUAGE_STORAGE_KEY, languageCode);
+      try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, languageCode);
+      } catch (storageError) {
+        console.warn('Failed to save language to localStorage:', storageError);
+        // Continue anyway, don't fail the language change
+      }
       
       return true;
     } catch (err) {
@@ -95,7 +105,7 @@ export const LanguageProvider = ({ children }) => {
       setError('Failed to change language');
       return false;
     }
-  }, [batchUpdate]);
+  }, [batchUpdate, currentLanguage]);
 
   // Memoized translation cache for performance
   const translationCache = useMemo(() => new Map(), []);
