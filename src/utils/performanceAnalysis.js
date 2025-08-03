@@ -355,7 +355,7 @@ export function logPerformanceReport() {
 }
 
 // Auto-generate report in development
-if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+if (import.meta.env.DEV && typeof window !== 'undefined') {
   // Generate report after initial load
   setTimeout(() => {
     logPerformanceReport();

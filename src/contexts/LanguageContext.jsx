@@ -8,9 +8,7 @@ import {
 } from '../translations/index.js';
 import { useOptimizedUpdates } from '../hooks/useReact19Optimizations.js';
 import { getInitialLanguage, getBrowserLanguageInfo } from '../utils/languageDetection.js';
-
-// Storage key for localStorage
-const LANGUAGE_STORAGE_KEY = 'azerbaijan-drug-db-language';
+import { SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, LANGUAGE_STORAGE_KEY } from '../constants/languages.js';
 
 // Create the context
 const LanguageContext = createContext({
@@ -100,7 +98,7 @@ export const LanguageProvider = ({ children }) => {
   }, [batchUpdate]);
 
   // Memoized translation cache for performance
-  const translationCache = useMemo(() => new Map(), [currentLanguage]);
+  const translationCache = useMemo(() => new Map(), []);
 
   // Optimized translation function with caching
   const t = useCallback((keyPath, fallbackValue = null) => {

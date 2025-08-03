@@ -79,12 +79,7 @@ export default {
     goToPage: 'Перейти на страницу',
     loadingPage: 'Загрузка страницы'
   },
-  columns: {
-    title: 'Видимость столбцов',
-    showHide: 'Показать/Скрыть столбцы',
-    selectAll: 'Выбрать все',
-    deselectAll: 'Отменить все'
-  },
+
   results: {
     loadingAriaLabel: 'Загрузка результатов поиска',
     noResultsForSearch: 'Результаты не найдены для поискового запроса:',
@@ -114,10 +109,9 @@ export default {
     loadingFailed: 'Не удалось загрузить данные',
     networkError: 'Ошибка сетевого подключения',
     serverError: 'Произошла ошибка сервера',
-    tryAgain: 'Пожалуйста, попробуйте позже',
+    tryAgain: 'Попробовать снова',
     somethingWentWrong: 'Что-то пошло не так',
     unexpectedError: 'Извините, но произошло что-то неожиданное. Приложение столкнулось с ошибкой и не может продолжить работу.',
-    tryAgain: 'Попробовать снова',
     refreshPage: 'Обновить страницу',
     errorDetails: 'Детали ошибки (только для разработки)',
     errorId: 'ID ошибки',

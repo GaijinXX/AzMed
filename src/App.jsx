@@ -1,4 +1,4 @@
-import React, { useState, useActionState, useOptimistic, useTransition, Suspense, useEffect, useCallback } from 'react'
+import { useState, useActionState, useOptimistic, useTransition, Suspense, useEffect, useCallback } from 'react'
 import SearchBar from './components/SearchBar'
 import DrugTable from './components/DrugTable'
 import Pagination from './components/Pagination'
@@ -18,7 +18,7 @@ import {
   InlineLoader
 } from './components/LoadingSkeletons/LoadingSkeletons'
 import { searchDrugs, getErrorMessage } from './services/supabase'
-import { initializeMonitoring, trackPageView, trackEvent } from './utils/monitoring'
+import { initializeMonitoring, trackPageView } from './utils/monitoring'
 import { getColumnLabel, getSortAnnouncement, validateSortColumn } from './components/DrugTable/sortConfig.js'
 import errorLogger from './services/errorLogger'
 import { useOptimizedUpdates, useOptimizedFetch, useCompilerOptimizations, useMemoryOptimization } from './hooks/useReact19Optimizations'
@@ -197,7 +197,7 @@ function App() {
     if (langParam && ['en', 'az', 'ru'].includes(langParam) && langParam !== currentLanguage) {
       setLanguage(langParam);
     }
-  }, []); // Only run once on mount
+  }, [currentLanguage, setLanguage]); // Include dependencies
   
   // Update URL when language changes (without interfering with main URL state)
   useEffect(() => {
@@ -440,7 +440,7 @@ function App() {
       // Show user-friendly error message
       setError('Unable to sort by this column. Please try again.')
     }
-  }, [validateSortColumn, performanceMonitor, currentSortColumn, currentSortDirection, updateURL, currentVisibleColumns])
+  }, [validateSortColumn, performanceMonitor, currentSortColumn, currentSortDirection, updateURL, currentVisibleColumns, addOptimisticUpdate, currentSearchText, pageSize, performSearch])
 
   // Handle column visibility toggle
   const handleColumnToggle = (columnKey) => {
@@ -535,7 +535,7 @@ function App() {
     })
 
     // Track memory usage in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       trackMemoryUsage()
 
       // Generate performance report after initial load
@@ -546,7 +546,7 @@ function App() {
 
     // Cleanup function for component unmount
     return cleanup
-  }, [cleanup, trackMemoryUsage]) // Only run once on mount
+  }, []) // Only run once on mount
 
   // Determine current loading state with React 19 optimizations
   const isLoading = optimisticState.loading || isUpdatePending || isURLLoading

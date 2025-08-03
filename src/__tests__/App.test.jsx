@@ -1,4 +1,4 @@
-import React from 'react'
+// React import removed - not needed with new JSX transform
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import App from '../App'
@@ -32,7 +32,7 @@ vi.mock('../services/errorLogger', () => ({
 
 // Mock components to focus on App state management
 vi.mock('../components/SearchBar', () => ({
-  default: ({ onSearch, initialValue, disabled }) => (
+  default: ({ initialValue, disabled }) => (
     <div data-testid="search-bar">
       <input
         data-testid="search-input"
@@ -54,7 +54,7 @@ vi.mock('../components/DrugTable', () => ({
 }))
 
 vi.mock('../components/Pagination', () => ({
-  default: ({ currentPage, totalPages, pageSize, totalCount, onPageChange, onPageSizeChange, disabled }) => (
+  default: ({ currentPage, totalPages, pageSize, totalCount, disabled }) => (
     <div data-testid="pagination">
       <div data-testid="current-page">{currentPage}</div>
       <div data-testid="total-pages">{totalPages}</div>

@@ -83,7 +83,7 @@ const withTimeout = (promise, timeoutMs = 30000) => {
 
 // Validate and parse API response with flexible format handling
 const parseApiResponse = (response, searchTerm = '', pageNumber = 1, pageSize = 10) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.group(`🔧 Response Parser`)
     console.log('📥 Input Response:', response)
     console.log('📊 Response Type:', typeof response)
@@ -92,7 +92,7 @@ const parseApiResponse = (response, searchTerm = '', pageNumber = 1, pageSize = 
   }
 
   if (!response) {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error('❌ Empty response received')
       console.groupEnd()
     }
@@ -197,7 +197,7 @@ const parseApiResponse = (response, searchTerm = '', pageNumber = 1, pageSize = 
     total_pages: totalPages
   }
 
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.log('✅ Normalized Response:', normalizedResponse)
     console.groupEnd()
   }
@@ -253,7 +253,7 @@ export const searchDrugs = async (
     const { data, error } = await withTimeout(apiCall)
 
     // Enhanced debug logging to understand response format
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.group(`🔍 Supabase Function Call: database-search`)
       console.log('📤 Request:', requestBody)
       console.log('📥 Raw Response:', { data, error })

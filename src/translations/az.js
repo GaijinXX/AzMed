@@ -79,12 +79,7 @@ export default {
     goToPage: 'Səhifəyə keç',
     loadingPage: 'Səhifə yüklənir'
   },
-  columns: {
-    title: 'Sütun Görünürlüyü',
-    showHide: 'Sütunları Göstər/Gizlə',
-    selectAll: 'Hamısını Seç',
-    deselectAll: 'Hamısını Ləğv et'
-  },
+
   results: {
     loadingAriaLabel: 'Axtarış nəticələri yüklənir',
     noResultsForSearch: 'Axtarış termini üçün nəticə tapılmadı:',
@@ -114,10 +109,9 @@ export default {
     loadingFailed: 'Məlumatların yüklənməsi uğursuz oldu',
     networkError: 'Şəbəkə bağlantısı xətası',
     serverError: 'Server xətası baş verdi',
-    tryAgain: 'Zəhmət olmasa daha sonra yenidən cəhd edin',
+    tryAgain: 'Yenidən Cəhd Et',
     somethingWentWrong: 'Nəsə səhv getdi',
     unexpectedError: 'Üzr istəyirik, lakin gözlənilməz bir şey baş verdi. Tətbiq xəta ilə qarşılaşdı və davam edə bilmədi.',
-    tryAgain: 'Yenidən Cəhd Et',
     refreshPage: 'Səhifəni Yenilə',
     errorDetails: 'Xəta Təfərrüatları (Yalnız İnkişaf)',
     errorId: 'Xəta ID',

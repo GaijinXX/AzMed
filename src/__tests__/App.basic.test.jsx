@@ -1,4 +1,4 @@
-import React from 'react'
+// React import removed - not needed with new JSX transform
 import { render, screen } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import App from '../App'
@@ -12,7 +12,7 @@ vi.mock('../services/supabase', () => ({
 
 // Mock components to focus on App state management
 vi.mock('../components/SearchBar', () => ({
-  default: ({ onSearch, initialValue, disabled }) => (
+  default: ({ initialValue, disabled }) => (
     <div data-testid="search-bar">
       <input
         data-testid="search-input"
@@ -24,7 +24,7 @@ vi.mock('../components/SearchBar', () => ({
 }))
 
 vi.mock('../components/DrugTable', () => ({
-  default: ({ drugs, loading, isPending }) => (
+  default: ({ drugs, loading }) => (
     <div data-testid="drug-table">
       {loading && <div data-testid="table-loading">Loading...</div>}
       <div data-testid="drug-count">{drugs.length}</div>

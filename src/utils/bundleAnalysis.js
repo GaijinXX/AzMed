@@ -225,9 +225,9 @@ export const checkCrossBrowserCompatibility = () => {
 
   try {
     // Check React 19 features
-    compatibility.features.useTransition = typeof React !== 'undefined' && typeof React.useTransition === 'function';
-    compatibility.features.useDeferredValue = typeof React !== 'undefined' && typeof React.useDeferredValue === 'function';
-    compatibility.features.useOptimistic = typeof React !== 'undefined' && typeof React.useOptimistic === 'function';
+    compatibility.features.useTransition = typeof window !== 'undefined' && 'React' in window && typeof window.React?.useTransition === 'function';
+    compatibility.features.useDeferredValue = typeof window !== 'undefined' && 'React' in window && typeof window.React?.useDeferredValue === 'function';
+    compatibility.features.useOptimistic = typeof window !== 'undefined' && 'React' in window && typeof window.React?.useOptimistic === 'function';
 
     // Check browser APIs
     compatibility.features.localStorage = typeof localStorage !== 'undefined';

@@ -342,7 +342,7 @@ export function useURLState(initialState, options = {}) {
     getStateHistory: () => [...stateHistoryRef.current],
     
     // Debug information (only in development)
-    ...(process.env.NODE_ENV === 'development' && {
+    ...(import.meta.env.DEV && {
       _debug: {
         lastURL: lastURLRef.current,
         stateHistory: stateHistoryRef.current,
@@ -355,7 +355,8 @@ export function useURLState(initialState, options = {}) {
     replaceURLState,
     resetURLState,
     isPending,
-    urlValidation.isValid
+    urlValidation.isValid,
+    urlValidation
   ]);
 }
 

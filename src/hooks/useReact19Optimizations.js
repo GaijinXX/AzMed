@@ -55,7 +55,7 @@ export function useOptimizedFetch(fetchFn, dependencies = []) {
     return measureApiCall('optimized-fetch', () => fetchFn(...args), {
       dependencies: dependencies.length
     });
-  }, [fetchFn, measureApiCall, ...dependencies]);
+  }, [fetchFn, measureApiCall, dependencies]);
 
   // Fetch with transition for non-urgent updates
   const fetchWithTransition = useCallback((...args) => {

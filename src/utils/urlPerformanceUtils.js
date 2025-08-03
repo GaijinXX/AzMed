@@ -149,7 +149,7 @@ export function throttle(func, wait, options = {}) {
 export class URLPerformanceMonitor {
   constructor() {
     this.metrics = new Map();
-    this.isEnabled = process.env.NODE_ENV === 'development';
+    this.isEnabled = import.meta.env.DEV;
   }
 
   /**

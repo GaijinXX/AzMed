@@ -7,7 +7,7 @@ class PerformanceMonitor {
   constructor() {
     this.metrics = new Map();
     this.observers = new Map();
-    this.isEnabled = process.env.NODE_ENV === 'development' || 
+    this.isEnabled = import.meta.env.DEV || 
                      typeof window !== 'undefined' && window.location.search.includes('debug=performance');
   }
 

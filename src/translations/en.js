@@ -79,12 +79,7 @@ export default {
     goToPage: 'Go to page',
     loadingPage: 'Loading page'
   },
-  columns: {
-    title: 'Column Visibility',
-    showHide: 'Show/Hide Columns',
-    selectAll: 'Select All',
-    deselectAll: 'Deselect All'
-  },
+
   results: {
     loadingAriaLabel: 'Loading search results',
     noResultsForSearch: 'No results found for search term:',
@@ -114,10 +109,9 @@ export default {
     loadingFailed: 'Failed to load data',
     networkError: 'Network connection error',
     serverError: 'Server error occurred',
-    tryAgain: 'Please try again later',
+    tryAgain: 'Try Again',
     somethingWentWrong: 'Something went wrong',
     unexpectedError: 'We\'re sorry, but something unexpected happened. The application encountered an error and couldn\'t continue.',
-    tryAgain: 'Try Again',
     refreshPage: 'Refresh Page',
     errorDetails: 'Error Details (Development Only)',
     errorId: 'Error ID',
