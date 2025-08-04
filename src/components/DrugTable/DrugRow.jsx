@@ -151,7 +151,7 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
           aria-label={`Wholesale price: ${formatPrice(wholesale_price)}`}
         >
           <span className={`${styles.cellContent} ${styles.priceCell}`}>
-            {formatPrice(wholesale_price)}
+            <span className={styles.manatSymbol}>₼</span>{(wholesale_price / 100).toFixed(2)}
           </span>
         </td>
       )}
@@ -164,7 +164,7 @@ function DrugRow({ drug, rowIndex, totalRows, visibleColumns = {} }) {
           aria-label={`Retail price: ${formatPrice(retail_price)}`}
         >
           <span className={`${styles.cellContent} ${styles.priceCell}`}>
-            {formatPrice(retail_price)}
+            <span className={styles.manatSymbol}>₼</span>{(retail_price / 100).toFixed(2)}
           </span>
         </td>
       )}

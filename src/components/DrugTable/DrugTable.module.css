@@ -118,7 +118,13 @@
 .priceCell {
   font-weight: 600;
   color: var(--color-success);
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Noto Sans', 'Arial Unicode MS', sans-serif, monospace;
+}
+
+/* Ensure Manat symbol renders properly on all devices, especially mobile Chrome */
+.manatSymbol {
+  font-family: 'Noto Sans', 'Arial Unicode MS', 'Segoe UI Symbol', 'Apple Color Emoji', 'DejaVu Sans', sans-serif;
+  font-weight: inherit;
 }
 
 /* Empty State */
@@ -358,8 +364,13 @@
   .cardPrice .cardValue {
     font-weight: 600;
     color: var(--color-success);
-    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Noto Sans', 'Arial Unicode MS', sans-serif, monospace;
     font-size: 1rem;
+  }
+
+  .manatSymbol {
+    font-family: 'Noto Sans', 'Arial Unicode MS', 'Segoe UI Symbol', 'Apple Color Emoji', 'DejaVu Sans', sans-serif;
+    font-weight: inherit;
   }
   
   .emptyState {

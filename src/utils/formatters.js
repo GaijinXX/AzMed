@@ -13,6 +13,20 @@ export function formatPrice(priceInQepik) {
 }
 
 /**
+ * Formats price as JSX with proper font fallback for Manat symbol
+ * @param {number} priceInQepik - Price in qəpik (1/100 AZN)
+ * @returns {JSX.Element} Formatted price with properly styled ₼ symbol
+ */
+export function formatPriceWithSymbol(priceInQepik) {
+  if (typeof priceInQepik !== 'number' || isNaN(priceInQepik)) {
+    return <><span className="manat-symbol">₼</span>0.00</>;
+  }
+  
+  const priceInAZN = priceInQepik / 100;
+  return <><span className="manat-symbol">₼</span>{priceInAZN.toFixed(2)}</>;
+}
+
+/**
  * Truncates text to specified length with ellipsis
  * @param {string} text - Text to truncate
  * @param {number} maxLength - Maximum length before truncation
