@@ -564,15 +564,11 @@ function App() {
     <ErrorBoundary
       fallback={({ onRetry }) => (
         <div className="App">
-          {/* Skip link for accessibility */}
-          <a href="#main-content" className="skip-link">
-            Skip to main content
-          </a>
           <header className="App-header" role="banner">
             <h1>{t('header.title')}</h1>
             <p>{t('header.subtitle')}</p>
           </header>
-          <main id="main-content" className="App-main" role="main" tabIndex="-1">
+          <main id="main-content" className="App-main" role="main">
             <ErrorState
               message={t('errors.loadingFailed')}
               onRetry={onRetry}
@@ -584,10 +580,6 @@ function App() {
       )}
     >
       <div className="App">
-        {/* Skip link for accessibility */}
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
         <div className="mobile-theme-selector">
           <LanguageSelector />
           <ThemeSelector />
@@ -605,7 +597,7 @@ function App() {
           </div>
         </header>
 
-        <main id="main-content" className="App-main" role="main" tabIndex="-1">
+        <main id="main-content" className="App-main" role="main">
           {/* Live region for screen reader announcements */}
           <div
             id="search-status"

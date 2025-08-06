@@ -249,23 +249,7 @@ textarea:disabled {
   border: 0;
 }
 
-/* Skip link for keyboard navigation */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 6px;
-  background: var(--color-text-primary);
-  color: var(--color-bg-primary);
-  padding: 8px;
-  text-decoration: none;
-  border-radius: var(--radius-sm);
-  z-index: 1000;
-  font-weight: 600;
-}
 
-.skip-link:focus {
-  top: 6px;
-}
 
 /* Focus management */
 .focus-trap {

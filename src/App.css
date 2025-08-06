@@ -281,24 +281,7 @@
   border: 0 !important;
 }
 
-/* Skip link for accessibility */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 6px;
-  background: var(--color-primary);
-  color: white;
-  padding: 8px;
-  text-decoration: none;
-  border-radius: var(--radius-md);
-  z-index: 1000;
-  font-weight: bold;
-  transition: top 0.3s;
-}
 
-.skip-link:focus {
-  top: 6px;
-}
 
 .focus-visible {
   outline: 2px solid var(--color-border-focus) !important;

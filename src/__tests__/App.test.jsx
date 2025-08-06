@@ -552,17 +552,14 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
     })
 
     // Verify accessibility features are integrated:
-    // 1. Skip link
-    expect(screen.getByText('Skip to main content')).toBeInTheDocument()
-
-    // 2. Proper heading structure
+    // 1. Proper heading structure
     expect(screen.getByText('Azerbaijan Drug Database')).toBeInTheDocument()
 
-    // 3. Live region for screen reader announcements
+    // 2. Live region for screen reader announcements
     const liveRegion = document.querySelector('[role="status"][aria-live="polite"]')
     expect(liveRegion).toBeInTheDocument()
 
-    // 4. Proper ARIA labels and structure
+    // 3. Proper ARIA labels and structure
     expect(document.querySelector('#main-content')).toBeInTheDocument()
     expect(document.querySelector('[role="banner"]')).toBeInTheDocument()
     expect(document.querySelector('[role="main"]')).toBeInTheDocument()
