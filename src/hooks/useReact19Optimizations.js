@@ -224,9 +224,15 @@ export function useCompilerOptimizations() {
   // Check if React Compiler is active
   const isCompilerActive = useMemo(() => {
     // React Compiler adds specific properties to components
-    return typeof window !== 'undefined' && 
-           window.React && 
-           window.React.version.startsWith('19');
+    try {
+      return typeof window !== 'undefined' && 
+             window.React && 
+             window.React.version && 
+             window.React.version.startsWith('19');
+    } catch (error) {
+      // In test environments or when window is not available
+      return false;
+    }
   }, []);
 
   return {
@@ -270,21 +276,29 @@ export function useMemoryOptimization() {
   // Cleanup function for component unmount
   const cleanup = useCallback(() => {
     // Clear any caches, cancel pending requests, etc.
-    if (typeof window !== 'undefined' && window.gc) {
-      // Suggest garbage collection in development
-      window.gc();
+    try {
+      if (typeof window !== 'undefined' && window.gc) {
+        // Suggest garbage collection in development
+        window.gc();
+      }
+    } catch (error) {
+      // Ignore errors in test environments
     }
   }, []);
 
   // Memory usage tracking (development only)
   const trackMemoryUsage = useCallback(() => {
-    if (typeof window !== 'undefined' && window.performance && window.performance.memory) {
-      const memory = window.performance.memory;
-      console.log('Memory Usage:', {
-        used: `${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-        total: `${(memory.totalJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-        limit: `${(memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB`
-      });
+    try {
+      if (typeof window !== 'undefined' && window.performance && window.performance.memory) {
+        const memory = window.performance.memory;
+        console.log('Memory Usage:', {
+          used: `${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
+          total: `${(memory.totalJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
+          limit: `${(memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB`
+        });
+      }
+    } catch (error) {
+      // Ignore errors in test environments
     }
   }, []);
 

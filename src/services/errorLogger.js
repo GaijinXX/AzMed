@@ -31,7 +31,7 @@ class ErrorLogger {
     }
 
     // Log to console in development
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV !== 'production') {
       console.group(`🚨 Error Log [${errorLog.severity}] - ${errorLog.id}`)
       console.error('Message:', errorLog.message)
       console.error('Type:', errorLog.type)
@@ -43,7 +43,7 @@ class ErrorLogger {
     }
 
     // In production, send to error tracking service
-    if (import.meta.env.PROD) {
+    if (process.env.NODE_ENV === 'production') {
       this.sendToErrorService(errorLog)
     }
 

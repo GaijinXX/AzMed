@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { LanguageProvider } from '../../../contexts/LanguageContext';
+
+// Test wrapper with LanguageProvider
+const TestWrapper = ({ children }) => (
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
+);
+
+const renderWithProvider = (ui, options = {}) => {
+  return render(ui, { wrapper: TestWrapper, ...options });
+};
 
 // Create a simplified version of SearchBar for testing
 function TestSearchBar({ 
@@ -96,7 +108,7 @@ describe('SearchBar Component', () => {
 
   describe('Basic Rendering', () => {
     it('renders search input with default placeholder', () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       expect(input).toBeInTheDocument();
@@ -105,14 +117,14 @@ describe('SearchBar Component', () => {
 
     it('renders with custom placeholder', () => {
       const customPlaceholder = 'Custom search placeholder';
-      render(<TestSearchBar onSearch={mockOnSearch} placeholder={customPlaceholder} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} placeholder={customPlaceholder} />);
       
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('placeholder', customPlaceholder);
     });
 
     it('renders search button', () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const searchButton = screen.getByRole('button', { name: /search/i });
       expect(searchButton).toBeInTheDocument();
@@ -120,14 +132,14 @@ describe('SearchBar Component', () => {
 
     it('renders with initial value', () => {
       const initialValue = 'aspirin';
-      render(<TestSearchBar onSearch={mockOnSearch} initialValue={initialValue} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} initialValue={initialValue} />);
       
       const input = screen.getByRole('textbox');
       expect(input).toHaveValue(initialValue);
     });
 
     it('does not render clear button when input is empty', () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const clearButton = screen.queryByRole('button', { name: /clear search/i });
       expect(clearButton).not.toBeInTheDocument();
@@ -136,7 +148,7 @@ describe('SearchBar Component', () => {
 
   describe('User Interactions', () => {
     it('calls onSearch when form is submitted', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       const searchButton = screen.getByRole('button', { name: /search/i });
@@ -148,7 +160,7 @@ describe('SearchBar Component', () => {
     });
 
     it('calls onSearch when Enter key is pressed', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       
@@ -159,7 +171,7 @@ describe('SearchBar Component', () => {
     });
 
     it('shows clear button when input has value', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       
@@ -170,7 +182,7 @@ describe('SearchBar Component', () => {
     });
 
     it('clears input when clear button is clicked', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       
@@ -184,7 +196,7 @@ describe('SearchBar Component', () => {
     });
 
     it('updates input value on typing', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       
@@ -196,7 +208,7 @@ describe('SearchBar Component', () => {
 
   describe('Disabled State', () => {
     it('disables input when disabled prop is true', () => {
-      render(<TestSearchBar onSearch={mockOnSearch} disabled={true} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} disabled={true} />);
       
       const input = screen.getByRole('textbox');
       const searchButton = screen.getByRole('button', { name: /search/i });
@@ -206,7 +218,7 @@ describe('SearchBar Component', () => {
     });
 
     it('prevents interaction when disabled', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} disabled={true} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} disabled={true} />);
       
       const input = screen.getByRole('textbox');
       const searchButton = screen.getByRole('button', { name: /search/i });
@@ -223,7 +235,7 @@ describe('SearchBar Component', () => {
 
   describe('Accessibility', () => {
     it('has proper ARIA labels', () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox', { name: /search drugs/i });
       const searchButton = screen.getByRole('button', { name: /search/i });
@@ -233,14 +245,14 @@ describe('SearchBar Component', () => {
     });
 
     it('has proper autocomplete attribute', () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('autocomplete', 'off');
     });
 
     it('clear button has proper ARIA label when visible', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       await user.type(input, 'test');
@@ -252,7 +264,7 @@ describe('SearchBar Component', () => {
 
   describe('Edge Cases', () => {
     it('handles empty search submission', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const searchButton = screen.getByRole('button', { name: /search/i });
       await user.click(searchButton);
@@ -261,7 +273,7 @@ describe('SearchBar Component', () => {
     });
 
     it('handles whitespace-only search', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       const searchButton = screen.getByRole('button', { name: /search/i });
@@ -273,7 +285,7 @@ describe('SearchBar Component', () => {
     });
 
     it('handles special characters in search', async () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const input = screen.getByRole('textbox');
       const searchButton = screen.getByRole('button', { name: /search/i });
@@ -285,7 +297,7 @@ describe('SearchBar Component', () => {
     });
 
     it('handles missing onSearch prop gracefully', async () => {
-      render(<TestSearchBar />);
+      renderWithProvider(<TestSearchBar />);
       
       const input = screen.getByRole('textbox');
       const searchButton = screen.getByRole('button', { name: /search/i });
@@ -299,7 +311,7 @@ describe('SearchBar Component', () => {
 
   describe('Component Structure', () => {
     it('has correct HTML structure', () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       // Check for main container
       const container = document.querySelector('.searchContainer');
@@ -323,7 +335,7 @@ describe('SearchBar Component', () => {
     });
 
     it('renders search icon in button', () => {
-      render(<TestSearchBar onSearch={mockOnSearch} />);
+      renderWithProvider(<TestSearchBar onSearch={mockOnSearch} />);
       
       const searchButton = screen.getByRole('button', { name: /search/i });
       expect(searchButton).toContainHTML('🔍');

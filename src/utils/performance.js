@@ -7,59 +7,129 @@ class PerformanceMonitor {
   constructor() {
     this.metrics = new Map();
     this.observers = new Map();
-    this.isEnabled = import.meta.env.DEV || 
-                     typeof window !== 'undefined' && window.location.search.includes('debug=performance');
+    this.isBrowser = this.checkBrowserEnvironment();
+    this.isEnabled = this.shouldEnableMonitoring();
+  }
+
+  /**
+   * Check if we're running in a browser environment
+   */
+  checkBrowserEnvironment() {
+    // Check for test environments first
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+      return false;
+    }
+    
+    // Check for Vitest environment
+    if (typeof globalThis !== 'undefined' && globalThis.__vitest__) {
+      return false;
+    }
+    
+    // Check for Jest environment
+    if (typeof global !== 'undefined' && global.jest) {
+      return false;
+    }
+    
+    // Check for JSDOM environment (common in tests)
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.userAgent && 
+        window.navigator.userAgent.includes('jsdom')) {
+      return false;
+    }
+    
+    return typeof window !== 'undefined' && 
+           typeof document !== 'undefined' && 
+           typeof performance !== 'undefined' &&
+           typeof window.location !== 'undefined';
+  }
+
+  /**
+   * Determine if performance monitoring should be enabled
+   */
+  shouldEnableMonitoring() {
+    // Always disabled in test environments
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+      return false;
+    }
+    
+    // Check for Vitest environment
+    if (typeof globalThis !== 'undefined' && globalThis.__vitest__) {
+      return false;
+    }
+    
+    // Check for Jest environment
+    if (typeof global !== 'undefined' && global.jest) {
+      return false;
+    }
+    
+    // Enable in development or when debug flag is present
+    return import.meta.env.DEV || 
+           (this.isBrowser && window.location.search.includes('debug=performance'));
   }
 
   /**
    * Start measuring a performance metric
    */
   startMeasure(name, metadata = {}) {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled || !this.isBrowser) return;
     
-    const startTime = performance.now();
-    this.metrics.set(name, {
-      startTime,
-      metadata,
-      type: 'measure'
-    });
-    
-    // Use Performance API for precise measurements
-    performance.mark(`${name}-start`);
+    try {
+      const startTime = performance.now();
+      this.metrics.set(name, {
+        startTime,
+        metadata,
+        type: 'measure'
+      });
+      
+      // Use Performance API for precise measurements
+      if (typeof performance.mark === 'function') {
+        performance.mark(`${name}-start`);
+      }
+    } catch (error) {
+      // Silently fail in environments where performance API is not available
+      console.warn('Performance monitoring failed to start measure:', error.message);
+    }
   }
 
   /**
    * End measuring a performance metric
    */
   endMeasure(name, additionalMetadata = {}) {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled || !this.isBrowser) return;
     
-    const endTime = performance.now();
-    const metric = this.metrics.get(name);
-    
-    if (!metric) {
-      console.warn(`Performance measure "${name}" was not started`);
-      return;
+    try {
+      const endTime = performance.now();
+      const metric = this.metrics.get(name);
+      
+      if (!metric) {
+        console.warn(`Performance measure "${name}" was not started`);
+        return;
+      }
+      
+      const duration = endTime - metric.startTime;
+      
+      // Use Performance API
+      if (typeof performance.mark === 'function' && typeof performance.measure === 'function') {
+        performance.mark(`${name}-end`);
+        performance.measure(name, `${name}-start`, `${name}-end`);
+      }
+      
+      const result = {
+        name,
+        duration,
+        startTime: metric.startTime,
+        endTime,
+        metadata: { ...metric.metadata, ...additionalMetadata }
+      };
+      
+      this.logMetric(result);
+      this.metrics.delete(name);
+      
+      return result;
+    } catch (error) {
+      // Silently fail in environments where performance API is not available
+      console.warn('Performance monitoring failed to end measure:', error.message);
+      this.metrics.delete(name);
     }
-    
-    const duration = endTime - metric.startTime;
-    
-    // Use Performance API
-    performance.mark(`${name}-end`);
-    performance.measure(name, `${name}-start`, `${name}-end`);
-    
-    const result = {
-      name,
-      duration,
-      startTime: metric.startTime,
-      endTime,
-      metadata: { ...metric.metadata, ...additionalMetadata }
-    };
-    
-    this.logMetric(result);
-    this.metrics.delete(name);
-    
-    return result;
   }
 
   /**
@@ -121,46 +191,66 @@ class PerformanceMonitor {
    * Monitor bundle size and loading performance
    */
   measureBundlePerformance() {
-    if (!this.isEnabled || typeof window === 'undefined') return;
+    if (!this.isEnabled || !this.isBrowser) return;
     
-    // Measure initial bundle load time
-    window.addEventListener('load', () => {
-      const navigation = performance.getEntriesByType('navigation')[0];
-      if (navigation) {
-        this.logMetric({
-          name: 'bundle-load',
-          duration: navigation.loadEventEnd - navigation.fetchStart,
-          metadata: {
-            type: 'bundle-performance',
-            domContentLoaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,
-            firstPaint: this.getFirstPaint(),
-            firstContentfulPaint: this.getFirstContentfulPaint()
+    try {
+      // Measure initial bundle load time (only in browser environment)
+      if (typeof window.addEventListener === 'function') {
+        window.addEventListener('load', () => {
+          try {
+            if (typeof performance.getEntriesByType === 'function') {
+              const navigation = performance.getEntriesByType('navigation')[0];
+              if (navigation) {
+                this.logMetric({
+                  name: 'bundle-load',
+                  duration: navigation.loadEventEnd - navigation.fetchStart,
+                  metadata: {
+                    type: 'bundle-performance',
+                    domContentLoaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,
+                    firstPaint: this.getFirstPaint(),
+                    firstContentfulPaint: this.getFirstContentfulPaint()
+                  }
+                });
+              }
+            }
+          } catch (error) {
+            console.warn('Failed to measure bundle performance:', error.message);
           }
         });
       }
-    });
 
-    // Monitor resource loading (only in browser environment)
-    if (typeof PerformanceObserver !== 'undefined') {
-      const observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.name.includes('.js') || entry.name.includes('.css')) {
-            this.logMetric({
-              name: 'resource-load',
-              duration: entry.duration,
-              metadata: {
-                type: 'resource-loading',
-                resource: entry.name,
-                size: entry.transferSize,
-                cached: entry.transferSize === 0
+      // Monitor resource loading (only in browser environment)
+      if (typeof PerformanceObserver !== 'undefined') {
+        try {
+          const observer = new PerformanceObserver((list) => {
+            try {
+              for (const entry of list.getEntries()) {
+                if (entry.name.includes('.js') || entry.name.includes('.css')) {
+                  this.logMetric({
+                    name: 'resource-load',
+                    duration: entry.duration,
+                    metadata: {
+                      type: 'resource-loading',
+                      resource: entry.name,
+                      size: entry.transferSize,
+                      cached: entry.transferSize === 0
+                    }
+                  });
+                }
               }
-            });
-          }
+            } catch (error) {
+              console.warn('Failed to process performance entries:', error.message);
+            }
+          });
+        
+          observer.observe({ entryTypes: ['resource'] });
+          this.observers.set('resource', observer);
+        } catch (error) {
+          console.warn('Failed to create PerformanceObserver:', error.message);
         }
-      });
-    
-      observer.observe({ entryTypes: ['resource'] });
-      this.observers.set('resource', observer);
+      }
+    } catch (error) {
+      console.warn('Failed to initialize bundle performance monitoring:', error.message);
     }
   }
 
@@ -168,25 +258,43 @@ class PerformanceMonitor {
    * Get First Paint timing
    */
   getFirstPaint() {
-    const paintEntries = performance.getEntriesByType('paint');
-    const firstPaint = paintEntries.find(entry => entry.name === 'first-paint');
-    return firstPaint ? firstPaint.startTime : null;
+    if (!this.isBrowser || typeof performance.getEntriesByType !== 'function') {
+      return null;
+    }
+    
+    try {
+      const paintEntries = performance.getEntriesByType('paint');
+      const firstPaint = paintEntries.find(entry => entry.name === 'first-paint');
+      return firstPaint ? firstPaint.startTime : null;
+    } catch (error) {
+      console.warn('Failed to get first paint timing:', error.message);
+      return null;
+    }
   }
 
   /**
    * Get First Contentful Paint timing
    */
   getFirstContentfulPaint() {
-    const paintEntries = performance.getEntriesByType('paint');
-    const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint');
-    return fcp ? fcp.startTime : null;
+    if (!this.isBrowser || typeof performance.getEntriesByType !== 'function') {
+      return null;
+    }
+    
+    try {
+      const paintEntries = performance.getEntriesByType('paint');
+      const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+      return fcp ? fcp.startTime : null;
+    } catch (error) {
+      console.warn('Failed to get first contentful paint timing:', error.message);
+      return null;
+    }
   }
 
   /**
    * Monitor React 19 automatic batching performance
    */
   measureBatchingPerformance(batchName, batchedUpdates) {
-    if (!this.isEnabled) return batchedUpdates();
+    if (!this.isEnabled || !this.isBrowser) return batchedUpdates();
     
     this.startMeasure(`batching-${batchName}`, { 
       type: 'automatic-batching',
@@ -196,16 +304,24 @@ class PerformanceMonitor {
     // React 19 automatically batches these updates
     const result = batchedUpdates();
     
-    // Use requestIdleCallback to measure after batching is complete
-    if (typeof requestIdleCallback !== 'undefined') {
-      requestIdleCallback(() => {
+    try {
+      // Use requestIdleCallback to measure after batching is complete
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(() => {
+          this.endMeasure(`batching-${batchName}`);
+        });
+      } else if (typeof setTimeout !== 'undefined') {
+        // Fallback for browsers without requestIdleCallback
+        setTimeout(() => {
+          this.endMeasure(`batching-${batchName}`);
+        }, 0);
+      } else {
+        // Immediate fallback for environments without async scheduling
         this.endMeasure(`batching-${batchName}`);
-      });
-    } else {
-      // Fallback for browsers without requestIdleCallback
-      setTimeout(() => {
-        this.endMeasure(`batching-${batchName}`);
-      }, 0);
+      }
+    } catch (error) {
+      console.warn('Failed to schedule batching performance measurement:', error.message);
+      this.endMeasure(`batching-${batchName}`);
     }
     
     return result;
@@ -217,40 +333,52 @@ class PerformanceMonitor {
   logMetric(metric) {
     if (!this.isEnabled) return;
     
-    const logLevel = metric.duration > 100 ? 'warn' : 'log';
-    console[logLevel](`🚀 Performance: ${metric.name}`, {
-      duration: `${metric.duration.toFixed(2)}ms`,
-      ...metric.metadata
-    });
-    
-    // Store for analysis
-    if (!window.__PERFORMANCE_METRICS__) {
-      window.__PERFORMANCE_METRICS__ = [];
+    try {
+      const logLevel = metric.duration > 100 ? 'warn' : 'log';
+      console[logLevel](`🚀 Performance: ${metric.name}`, {
+        duration: `${metric.duration.toFixed(2)}ms`,
+        ...metric.metadata
+      });
+      
+      // Store for analysis (only in browser environment)
+      if (this.isBrowser && typeof window !== 'undefined') {
+        if (!window.__PERFORMANCE_METRICS__) {
+          window.__PERFORMANCE_METRICS__ = [];
+        }
+        window.__PERFORMANCE_METRICS__.push(metric);
+      }
+    } catch (error) {
+      // Silently fail if logging fails
+      console.warn('Failed to log performance metric:', error.message);
     }
-    window.__PERFORMANCE_METRICS__.push(metric);
   }
 
   /**
    * Get performance summary
    */
   getSummary() {
-    if (typeof window === 'undefined' || !window.__PERFORMANCE_METRICS__) {
+    if (!this.isBrowser || typeof window === 'undefined' || !window.__PERFORMANCE_METRICS__) {
       return { metrics: [], summary: {} };
     }
     
-    const metrics = window.__PERFORMANCE_METRICS__;
-    const summary = {
-      totalMeasurements: metrics.length,
-      averageRenderTime: this.getAverageByType(metrics, 'component-render'),
-      averageApiTime: this.getAverageByType(metrics, 'api-call'),
-      bundleLoadTime: metrics.find(m => m.name === 'bundle-load')?.duration || 0,
-      slowestOperations: metrics
-        .sort((a, b) => b.duration - a.duration)
-        .slice(0, 5)
-        .map(m => ({ name: m.name, duration: m.duration }))
-    };
-    
-    return { metrics, summary };
+    try {
+      const metrics = window.__PERFORMANCE_METRICS__;
+      const summary = {
+        totalMeasurements: metrics.length,
+        averageRenderTime: this.getAverageByType(metrics, 'component-render'),
+        averageApiTime: this.getAverageByType(metrics, 'api-call'),
+        bundleLoadTime: metrics.find(m => m.name === 'bundle-load')?.duration || 0,
+        slowestOperations: metrics
+          .sort((a, b) => b.duration - a.duration)
+          .slice(0, 5)
+          .map(m => ({ name: m.name, duration: m.duration }))
+      };
+      
+      return { metrics, summary };
+    } catch (error) {
+      console.warn('Failed to generate performance summary:', error.message);
+      return { metrics: [], summary: {} };
+    }
   }
 
   /**
@@ -290,9 +418,13 @@ export const usePerformanceMonitor = () => {
   };
 };
 
-// Initialize bundle performance monitoring
-if (typeof window !== 'undefined') {
-  performanceMonitor.measureBundlePerformance();
+// Initialize bundle performance monitoring (only in browser environment)
+try {
+  if (performanceMonitor.isBrowser && performanceMonitor.isEnabled) {
+    performanceMonitor.measureBundlePerformance();
+  }
+} catch (error) {
+  console.warn('Failed to initialize performance monitoring:', error.message);
 }
 
 export default performanceMonitor;

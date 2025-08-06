@@ -105,7 +105,7 @@ class ErrorBoundary extends Component {
               </button>
             </div>
 
-            {import.meta.env.DEV && this.state.error && (
+            {process.env.NODE_ENV !== 'production' && this.state.error && (
               <details className="error-details">
                 <summary>{t('errors.errorDetails')}</summary>
                 <pre className="error-stack">

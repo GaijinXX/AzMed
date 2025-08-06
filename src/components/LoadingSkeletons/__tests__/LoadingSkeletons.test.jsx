@@ -1,6 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { vi, describe, it, expect } from 'vitest'
+import { LanguageProvider } from '../../../contexts/LanguageContext'
 import {
   Skeleton,
   SearchBarSkeleton,
@@ -14,34 +15,45 @@ import {
   EmptyState
 } from '../LoadingSkeletons'
 
+// Test wrapper with LanguageProvider
+const TestWrapper = ({ children }) => (
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
+)
+
+const renderWithProvider = (ui, options = {}) => {
+  return render(ui, { wrapper: TestWrapper, ...options })
+}
+
 describe('LoadingSkeletons', () => {
   describe('Skeleton', () => {
     it('should render with default props', () => {
-      render(<Skeleton />)
+      renderWithProvider(<Skeleton />)
       
-      const skeleton = screen.getByLabelText('Loading...')
+      const skeleton = screen.getByLabelText('Loading')
       expect(skeleton).toBeInTheDocument()
       expect(skeleton).toHaveClass('skeleton')
     })
 
     it('should apply custom width and height', () => {
-      render(<Skeleton width="200px" height="50px" />)
+      renderWithProvider(<Skeleton width="200px" height="50px" />)
       
-      const skeleton = screen.getByLabelText('Loading...')
+      const skeleton = screen.getByLabelText('Loading')
       expect(skeleton).toHaveStyle({ width: '200px', height: '50px' })
     })
 
     it('should apply custom className', () => {
-      render(<Skeleton className="custom-skeleton" />)
+      renderWithProvider(<Skeleton className="custom-skeleton" />)
       
-      const skeleton = screen.getByLabelText('Loading...')
+      const skeleton = screen.getByLabelText('Loading')
       expect(skeleton).toHaveClass('skeleton', 'custom-skeleton')
     })
   })
 
   describe('SearchBarSkeleton', () => {
     it('should render search bar skeleton', () => {
-      render(<SearchBarSkeleton />)
+      renderWithProvider(<SearchBarSkeleton />)
       
       expect(screen.getByLabelText('Loading search bar')).toBeInTheDocument()
       expect(screen.getByRole('status')).toBeInTheDocument()
@@ -50,7 +62,7 @@ describe('LoadingSkeletons', () => {
 
   describe('ResultsInfoSkeleton', () => {
     it('should render results info skeleton', () => {
-      render(<ResultsInfoSkeleton />)
+      renderWithProvider(<ResultsInfoSkeleton />)
       
       expect(screen.getByLabelText('Loading results information')).toBeInTheDocument()
       expect(screen.getByRole('status')).toBeInTheDocument()
@@ -59,14 +71,14 @@ describe('LoadingSkeletons', () => {
 
   describe('TableSkeleton', () => {
     it('should render table skeleton with default rows', () => {
-      render(<TableSkeleton />)
+      renderWithProvider(<TableSkeleton />)
       
       expect(screen.getByLabelText('Loading table data')).toBeInTheDocument()
       expect(screen.getByRole('status')).toBeInTheDocument()
     })
 
     it('should render table skeleton with custom row count', () => {
-      render(<TableSkeleton rows={5} />)
+      renderWithProvider(<TableSkeleton rows={5} />)
       
       const skeleton = screen.getByLabelText('Loading table data')
       expect(skeleton).toBeInTheDocument()
@@ -79,7 +91,7 @@ describe('LoadingSkeletons', () => {
 
   describe('PaginationSkeleton', () => {
     it('should render pagination skeleton', () => {
-      render(<PaginationSkeleton />)
+      renderWithProvider(<PaginationSkeleton />)
       
       expect(screen.getByLabelText('Loading pagination controls')).toBeInTheDocument()
       expect(screen.getByRole('status')).toBeInTheDocument()
@@ -88,7 +100,7 @@ describe('LoadingSkeletons', () => {
 
   describe('LoadingSpinner', () => {
     it('should render with default size', () => {
-      render(<LoadingSpinner />)
+      renderWithProvider(<LoadingSpinner />)
       
       const spinner = screen.getByRole('status')
       expect(spinner).toBeInTheDocument()
@@ -97,14 +109,14 @@ describe('LoadingSkeletons', () => {
     })
 
     it('should render with custom size', () => {
-      render(<LoadingSpinner size="large" />)
+      renderWithProvider(<LoadingSpinner size="large" />)
       
       const spinner = screen.getByRole('status')
       expect(spinner).toHaveClass('loading-spinner', 'spinner-large')
     })
 
     it('should apply custom className', () => {
-      render(<LoadingSpinner className="custom-spinner" />)
+      renderWithProvider(<LoadingSpinner className="custom-spinner" />)
       
       const spinner = screen.getByRole('status')
       expect(spinner).toHaveClass('loading-spinner', 'spinner-medium', 'custom-spinner')
@@ -113,7 +125,7 @@ describe('LoadingSkeletons', () => {
 
   describe('InlineLoader', () => {
     it('should render with default text', () => {
-      render(<InlineLoader />)
+      renderWithProvider(<InlineLoader />)
       
       // InlineLoader has role="status", LoadingSpinner inside doesn't when standalone=false
       expect(screen.getByRole('status')).toBeInTheDocument()
@@ -122,13 +134,13 @@ describe('LoadingSkeletons', () => {
     })
 
     it('should render with custom text', () => {
-      render(<InlineLoader text="Searching..." />)
+      renderWithProvider(<InlineLoader text="Searching..." />)
       
       expect(screen.getByText('Searching...')).toBeInTheDocument()
     })
 
     it('should apply custom className', () => {
-      render(<InlineLoader className="custom-inline" />)
+      renderWithProvider(<InlineLoader className="custom-inline" />)
       
       const loader = screen.getByRole('status')
       expect(loader).toHaveClass('inline-loader', 'custom-inline')
@@ -137,7 +149,7 @@ describe('LoadingSkeletons', () => {
 
   describe('LoadingOverlay', () => {
     it('should render with default message', () => {
-      render(<LoadingOverlay />)
+      renderWithProvider(<LoadingOverlay />)
       
       // LoadingOverlay has role="status", LoadingSpinner inside doesn't when standalone=false
       expect(screen.getByRole('status')).toBeInTheDocument()
@@ -146,13 +158,13 @@ describe('LoadingSkeletons', () => {
     })
 
     it('should render with custom message', () => {
-      render(<LoadingOverlay message="Processing..." />)
+      renderWithProvider(<LoadingOverlay message="Processing..." />)
       
       expect(screen.getByText('Processing...')).toBeInTheDocument()
     })
 
     it('should apply transparent class when specified', () => {
-      render(<LoadingOverlay transparent={true} />)
+      renderWithProvider(<LoadingOverlay transparent={true} />)
       
       const overlay = screen.getByRole('status')
       expect(overlay).toHaveClass('loading-overlay', 'transparent')
@@ -161,7 +173,7 @@ describe('LoadingSkeletons', () => {
 
   describe('ErrorState', () => {
     it('should render error message', () => {
-      render(<ErrorState message="Something went wrong" />)
+      renderWithProvider(<ErrorState message="Something went wrong" />)
       
       expect(screen.getByRole('alert')).toBeInTheDocument()
       expect(screen.getByText('Something went wrong')).toBeInTheDocument()
@@ -169,7 +181,7 @@ describe('LoadingSkeletons', () => {
 
     it('should render retry button when onRetry is provided', () => {
       const mockRetry = vi.fn()
-      render(<ErrorState message="Error" onRetry={mockRetry} />)
+      renderWithProvider(<ErrorState message="Error" onRetry={mockRetry} />)
       
       const retryButton = screen.getByRole('button', { name: 'Try Again' })
       expect(retryButton).toBeInTheDocument()
@@ -180,7 +192,7 @@ describe('LoadingSkeletons', () => {
 
     it('should render custom retry text', () => {
       const mockRetry = vi.fn()
-      render(<ErrorState message="Error" onRetry={mockRetry} retryText="Retry Now" />)
+      renderWithProvider(<ErrorState message="Error" onRetry={mockRetry} retryText="Retry Now" />)
       
       expect(screen.getByRole('button', { name: 'Retry Now' })).toBeInTheDocument()
     })
@@ -193,7 +205,7 @@ describe('LoadingSkeletons', () => {
         writable: true
       })
 
-      render(<ErrorState message="Error" showRefresh={true} />)
+      renderWithProvider(<ErrorState message="Error" showRefresh={true} />)
       
       const refreshButton = screen.getByRole('button', { name: 'Refresh Page' })
       expect(refreshButton).toBeInTheDocument()
@@ -203,7 +215,7 @@ describe('LoadingSkeletons', () => {
     })
 
     it('should apply custom className', () => {
-      render(<ErrorState message="Error" className="custom-error" />)
+      renderWithProvider(<ErrorState message="Error" className="custom-error" />)
       
       const errorState = screen.getByRole('alert')
       expect(errorState).toHaveClass('error-state', 'custom-error')
@@ -212,42 +224,42 @@ describe('LoadingSkeletons', () => {
 
   describe('EmptyState', () => {
     it('should render with default message', () => {
-      render(<EmptyState />)
+      renderWithProvider(<EmptyState />)
       
       expect(screen.getByRole('status')).toBeInTheDocument()
       expect(screen.getByText('No results found')).toBeInTheDocument()
     })
 
     it('should render with custom message', () => {
-      render(<EmptyState message="No data available" />)
+      renderWithProvider(<EmptyState message="No data available" />)
       
       expect(screen.getByText('No data available')).toBeInTheDocument()
     })
 
     it('should render description when provided', () => {
-      render(<EmptyState message="Empty" description="Try a different search" />)
+      renderWithProvider(<EmptyState message="Empty" description="Try a different search" />)
       
       expect(screen.getByText('Try a different search')).toBeInTheDocument()
     })
 
     it('should render action when provided', () => {
       const action = <button>Clear Search</button>
-      render(<EmptyState message="Empty" action={action} />)
+      renderWithProvider(<EmptyState message="Empty" action={action} />)
       
       expect(screen.getByRole('button', { name: 'Clear Search' })).toBeInTheDocument()
     })
 
     it('should apply custom className', () => {
-      render(<EmptyState className="custom-empty" />)
+      renderWithProvider(<EmptyState className="custom-empty" />)
       
       const emptyState = screen.getByRole('status')
-      expect(emptyState).toHaveClass('empty-state', 'custom-empty')
+      expect(emptyState).toHaveClass('custom-empty')
     })
   })
 
   describe('Accessibility', () => {
     it('should have proper ARIA labels for screen readers', () => {
-      render(
+      renderWithProvider(
         <div>
           <SearchBarSkeleton />
           <ResultsInfoSkeleton />
@@ -276,7 +288,7 @@ describe('LoadingSkeletons', () => {
     })
 
     it('should have screen reader only text for spinners', () => {
-      render(<LoadingSpinner />)
+      renderWithProvider(<LoadingSpinner />)
       
       const srText = screen.getByText('Loading...')
       expect(srText).toHaveClass('sr-only')

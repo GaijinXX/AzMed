@@ -1,9 +1,21 @@
 import React from 'react'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { LanguageProvider } from '../contexts/LanguageContext'
 import App from '../App'
 import * as supabaseService from '../services/supabase'
 import errorLogger from '../services/errorLogger'
+
+// Test wrapper with LanguageProvider
+const TestWrapper = ({ children }) => (
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
+);
+
+const renderWithProvider = (ui, options = {}) => {
+  return render(ui, { wrapper: TestWrapper, ...options });
+};
 
 // Mock the supabase service
 vi.mock('../services/supabase', () => ({
@@ -55,6 +67,7 @@ vi.mock('../hooks/useTranslation', () => ({
 // Mock language context
 vi.mock('../contexts/LanguageContext', () => ({
   default: {},
+  LanguageProvider: ({ children }) => children,
   useLanguageContext: vi.fn(() => ({
     setLanguage: vi.fn(),
     currentLanguage: 'en'
@@ -129,7 +142,7 @@ describe('App Component State Management', () => {
   })
 
   it('should initialize with correct default state and load initial data', async () => {
-    render(<App />)
+    renderWithProvider(<App />)
 
     // Wait for initial load
     await waitFor(() => {
@@ -151,7 +164,7 @@ describe('App Component State Management', () => {
     supabaseService.searchDrugs.mockRejectedValue(mockError)
     supabaseService.getErrorMessage.mockReturnValue(errorMessage)
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument()
@@ -178,7 +191,7 @@ describe('App Component State Management', () => {
       .mockResolvedValueOnce(mockDrugsResponse)
     supabaseService.getErrorMessage.mockReturnValue(errorMessage)
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     // Wait for initial error
     await waitFor(() => {
@@ -207,7 +220,7 @@ describe('App Component State Management', () => {
   it('should use React 19 hooks for state management', async () => {
     // This test verifies that the component renders without errors
     // which means all React 19 hooks (useState, useActionState, useOptimistic, useTransition) are properly integrated
-    render(<App />)
+    renderWithProvider(<App />)
 
     await waitFor(() => {
       expect(supabaseService.searchDrugs).toHaveBeenCalled()
@@ -221,7 +234,7 @@ describe('App Component State Management', () => {
   })
 
   it('should implement automatic batching for state updates', async () => {
-    render(<App />)
+    renderWithProvider(<App />)
 
     // Wait for initial load
     await waitFor(() => {
@@ -237,7 +250,7 @@ describe('App Component State Management', () => {
 
   it('should integrate Suspense boundaries for progressive loading', () => {
     // This test verifies that Suspense is properly integrated
-    render(<App />)
+    renderWithProvider(<App />)
     
     // The fact that the component renders without errors means Suspense is working
     expect(screen.getByText('Azerbaijan Drug Database')).toBeInTheDocument()
@@ -251,7 +264,7 @@ describe('App Component Error Boundary and Loading States', () => {
       new Promise(resolve => setTimeout(() => resolve(mockDrugsResponse), 100))
     )
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     // The mocked components show loading states instead of actual skeletons
     // Check for the loading indicators in the mocked components
@@ -269,7 +282,7 @@ describe('App Component Error Boundary and Loading States', () => {
     }
     supabaseService.searchDrugs.mockResolvedValue(emptyResponse)
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     await waitFor(() => {
       expect(screen.getByText('No data available')).toBeInTheDocument()
@@ -292,7 +305,7 @@ describe('App Component Error Boundary and Loading States', () => {
       .mockResolvedValueOnce(mockDrugsResponse)
       .mockResolvedValueOnce(emptyResponse)
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     // Wait for initial load
     await waitFor(() => {
@@ -310,7 +323,7 @@ describe('App Component Error Boundary and Loading States', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     
     // The enhanced error boundary is integrated in the App component
-    render(<App />)
+    renderWithProvider(<App />)
     expect(screen.getByText('Azerbaijan Drug Database')).toBeInTheDocument()
     
     consoleSpy.mockRestore()
@@ -326,7 +339,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
   it('should complete full search workflow from initial load to search results', async () => {
     supabaseService.searchDrugs.mockResolvedValue(mockDrugsResponse)
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     // 1. Verify initial data loading
     await waitFor(() => {
@@ -354,7 +367,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
   it('should complete full pagination workflow with server-side integration', async () => {
     supabaseService.searchDrugs.mockResolvedValue(mockDrugsResponse)
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     // Wait for initial load
     await waitFor(() => {
@@ -377,7 +390,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
       .mockRejectedValueOnce(networkError)     // Initial load fails
       .mockResolvedValueOnce(mockDrugsResponse) // Retry succeeds
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     // 1. Verify error state is displayed
     await waitFor(() => {
@@ -392,7 +405,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
     expect(errorLogger.logApiError).toHaveBeenCalledWith(networkError, {
       endpoint: 'database-search',
       method: 'POST',
-      parameters: { searchTerm: '%', page: 1, size: 10 },
+      parameters: { searchTerm: '', page: 1, size: 10, orderBy: null, orderDir: 'asc' },
       operation: 'performSearch'
     })
 
@@ -429,7 +442,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
 
     supabaseService.searchDrugs.mockResolvedValue(singlePageResponse)
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     await waitFor(() => {
       expect(supabaseService.searchDrugs).toHaveBeenCalledWith('', 1, 10, null, 'asc')
@@ -440,6 +453,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
     expect(screen.getByTestId('results-total')).toHaveTextContent('1')
     
     // Pagination should NOT be shown for single page results (totalPages = 1)
+    // The App component only shows pagination when totalPages > 1
     expect(screen.queryByTestId('pagination')).not.toBeInTheDocument()
   })
 
@@ -458,7 +472,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
 
     supabaseService.searchDrugs.mockResolvedValue(largeDatasetResponse)
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     await waitFor(() => {
       expect(supabaseService.searchDrugs).toHaveBeenCalledWith('', 1, 10, null, 'asc')
@@ -475,7 +489,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
   it('should integrate all React 19 features correctly', async () => {
     supabaseService.searchDrugs.mockResolvedValue(mockDrugsResponse)
     
-    render(<App />)
+    renderWithProvider(<App />)
 
     // Wait for initial load to complete
     await waitFor(() => {
@@ -516,7 +530,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
       .mockResolvedValueOnce(responses[1])
       .mockResolvedValueOnce(responses[2])
 
-    render(<App />)
+    renderWithProvider(<App />)
 
     // Wait for initial load
     await waitFor(() => {
@@ -530,7 +544,7 @@ describe('App Component Integration Tests - Complete User Workflows', () => {
   })
 
   it('should maintain accessibility throughout user workflows', async () => {
-    render(<App />)
+    renderWithProvider(<App />)
 
     // Wait for initial load
     await waitFor(() => {

@@ -13,17 +13,17 @@ export function formatPrice(priceInQepik) {
 }
 
 /**
- * Formats price as JSX with proper font fallback for Manat symbol
+ * Formats price with proper styling information for Manat symbol
  * @param {number} priceInQepik - Price in qəpik (1/100 AZN)
- * @returns {JSX.Element} Formatted price with properly styled ₼ symbol
+ * @returns {Object} Object with symbol and value for styled rendering
  */
 export function formatPriceWithSymbol(priceInQepik) {
   if (typeof priceInQepik !== 'number' || isNaN(priceInQepik)) {
-    return <><span className="manat-symbol">₼</span>0.00</>;
+    return { symbol: '₼', value: '0.00' };
   }
   
   const priceInAZN = priceInQepik / 100;
-  return <><span className="manat-symbol">₼</span>{priceInAZN.toFixed(2)}</>;
+  return { symbol: '₼', value: priceInAZN.toFixed(2) };
 }
 
 /**

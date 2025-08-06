@@ -2,7 +2,19 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
+import { LanguageProvider } from '../../../contexts/LanguageContext';
 import DrugTable from '../DrugTable';
+
+// Test wrapper with LanguageProvider
+const TestWrapper = ({ children }) => (
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
+);
+
+const renderWithProvider = (ui, options = {}) => {
+  return render(ui, { wrapper: TestWrapper, ...options });
+};
 
 // Mock the React 19 optimizations hooks
 vi.mock('../../../hooks/useReact19Optimizations', () => ({
@@ -13,6 +25,9 @@ vi.mock('../../../hooks/useReact19Optimizations', () => ({
   })),
   useCompilerOptimizations: vi.fn(() => ({
     trackRender: vi.fn()
+  })),
+  useOptimizedUpdates: vi.fn(() => ({
+    optimizedUpdate: vi.fn()
   }))
 }));
 
@@ -48,7 +63,7 @@ const defaultVisibleColumns = {
 
 describe('DrugTable Column Visibility Integration', () => {
   it('renders table with default visible columns', () => {
-    render(
+    renderWithProvider(
       <DrugTable
         drugs={mockDrugs}
         visibleColumns={defaultVisibleColumns}
@@ -65,11 +80,11 @@ describe('DrugTable Column Visibility Integration', () => {
     expect(screen.getByText('Test Drug 1')).toBeInTheDocument();
     expect(screen.getByText('Ingredient A, Ingredient B')).toBeInTheDocument();
     expect(screen.getByText('30 tablets')).toBeInTheDocument(); // amount is now visible
-    expect(screen.getByText('₼20.00')).toBeInTheDocument(); // retail_price is still visible
+    expect(screen.getByText('20.00')).toBeInTheDocument(); // retail_price is still visible
   });
 
   it('renders loading skeleton without column selector', () => {
-    render(
+    renderWithProvider(
       <DrugTable
         drugs={mockDrugs}
         loading={true}
@@ -96,7 +111,7 @@ describe('DrugTable Column Visibility Integration', () => {
       date: false
     };
 
-    render(
+    renderWithProvider(
       <DrugTable
         drugs={mockDrugs}
         visibleColumns={partiallyVisibleColumns}
@@ -105,7 +120,7 @@ describe('DrugTable Column Visibility Integration', () => {
     );
 
     // Should only show headers for visible columns
-    expect(screen.getByTitle('Registration Number')).toBeInTheDocument();
+    expect(screen.getByTitle('Registration #')).toBeInTheDocument();
     expect(screen.getByText('Product Name')).toBeInTheDocument();
     expect(screen.getByTitle('Wholesale Price in Azerbaijan Manat')).toBeInTheDocument();
 
@@ -117,7 +132,7 @@ describe('DrugTable Column Visibility Integration', () => {
     // Should only show data for visible columns
     expect(screen.getByText('12345')).toBeInTheDocument(); // number
     expect(screen.getByText('Test Drug 1')).toBeInTheDocument(); // product_name
-    expect(screen.getByText('₼15.00')).toBeInTheDocument(); // wholesale_price
+    expect(screen.getByText('15.00')).toBeInTheDocument(); // wholesale_price
 
     // Should not show data for hidden columns
     expect(screen.queryByText('Ingredient A, Ingredient B')).not.toBeInTheDocument(); // active_ingredients

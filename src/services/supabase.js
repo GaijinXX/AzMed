@@ -184,8 +184,8 @@ const parseApiResponse = (response, searchTerm = '', pageNumber = 1, pageSize = 
   if (typeof currentPageSize !== 'number' || currentPageSize < 1) {
     currentPageSize = Math.max(1, currentPageSize || 10) // Ensure positive
   }
-  if (typeof totalPages !== 'number' || totalPages < 0) {
-    totalPages = Math.max(0, Math.ceil(totalCount / currentPageSize)) // Recalculate if needed
+  if (typeof totalPages !== 'number' || totalPages < 0 || Object.is(totalPages, -0)) {
+    totalPages = Math.max(0, Math.ceil(totalCount / currentPageSize)) + 0 // Recalculate if needed, +0 ensures positive zero
   }
 
   // Return normalized response format

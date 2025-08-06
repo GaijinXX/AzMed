@@ -564,6 +564,10 @@ function App() {
     <ErrorBoundary
       fallback={({ onRetry }) => (
         <div className="App">
+          {/* Skip link for accessibility */}
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
           <header className="App-header" role="banner">
             <h1>{t('header.title')}</h1>
             <p>{t('header.subtitle')}</p>
@@ -580,6 +584,10 @@ function App() {
       )}
     >
       <div className="App">
+        {/* Skip link for accessibility */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <div className="mobile-theme-selector">
           <LanguageSelector />
           <ThemeSelector />

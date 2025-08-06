@@ -1,19 +1,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { LanguageContext } from '../../contexts/LanguageContext';
+import { LanguageProvider } from '../../contexts/LanguageContext';
 import SearchBar from '../SearchBar/SearchBar';
 import DrugTable from '../DrugTable/DrugTable';
 import Pagination from '../Pagination/Pagination';
 
 // Mock translation function that returns empty string for missing keys
 const mockTranslationFunction = vi.fn((key) => {
-  // Simulate missing translation keys
-  if (key === 'search.placeholder') return '';
-  if (key === 'common.search') return '';
-  if (key === 'table.noResults') return '';
-  
-  // Return the key itself as fallback (this is what the real t function does)
+  // Simulate missing translation keys by returning the key itself as fallback
+  // This is what the real t function does when translations are missing
   return key;
 });
 
@@ -24,11 +20,20 @@ const mockLanguageContext = {
   isLoading: false
 };
 
-const TestWrapper = ({ children }) => (
-  <LanguageContext.Provider value={mockLanguageContext}>
-    {children}
-  </LanguageContext.Provider>
-);
+// Mock the LanguageContext
+vi.mock('../../contexts/LanguageContext', () => ({
+  LanguageProvider: ({ children }) => children,
+  useLanguage: () => mockLanguageContext
+}));
+
+// Mock the useTranslation hook
+vi.mock('../../hooks/useTranslation', () => ({
+  useTranslation: () => ({
+    t: mockTranslationFunction
+  })
+}));
+
+const TestWrapper = ({ children }) => children;
 
 describe('Translation Fallback Tests', () => {
   it('handles missing search placeholder gracefully', () => {

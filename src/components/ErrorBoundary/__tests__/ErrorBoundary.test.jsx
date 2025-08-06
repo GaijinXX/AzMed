@@ -1,7 +1,19 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { LanguageProvider } from '../../../contexts/LanguageContext'
 import ErrorBoundary from '../ErrorBoundary'
+
+// Test wrapper with LanguageProvider
+const TestWrapper = ({ children }) => (
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
+)
+
+const renderWithProvider = (ui, options = {}) => {
+  return render(ui, { wrapper: TestWrapper, ...options })
+}
 
 // Mock console.error to avoid noise in tests
 const originalConsoleError = console.error
@@ -23,7 +35,7 @@ const ThrowError = ({ shouldThrow = false, errorMessage = 'Test error' }) => {
 
 describe('ErrorBoundary', () => {
   it('should render children when there is no error', () => {
-    render(
+    renderWithProvider(
       <ErrorBoundary>
         <div>Test content</div>
       </ErrorBoundary>
@@ -33,7 +45,7 @@ describe('ErrorBoundary', () => {
   })
 
   it('should render default error UI when an error occurs', () => {
-    render(
+    renderWithProvider(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
@@ -55,7 +67,7 @@ describe('ErrorBoundary', () => {
       </div>
     )
 
-    render(
+    renderWithProvider(
       <ErrorBoundary fallback={CustomFallback}>
         <ThrowError shouldThrow={true} errorMessage="Custom error message" />
       </ErrorBoundary>
@@ -77,7 +89,7 @@ describe('ErrorBoundary', () => {
       return <div>No error</div>
     }
 
-    const { rerender } = render(
+    const { rerender } = renderWithProvider(
       <ErrorBoundary>
         <TestComponent />
       </ErrorBoundary>
@@ -110,7 +122,7 @@ describe('ErrorBoundary', () => {
       writable: true
     })
 
-    render(
+    renderWithProvider(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
@@ -122,7 +134,7 @@ describe('ErrorBoundary', () => {
   })
 
   it('should log error details to console', () => {
-    render(
+    renderWithProvider(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} errorMessage="Test error for logging" />
       </ErrorBoundary>
@@ -150,7 +162,7 @@ describe('ErrorBoundary', () => {
     
     // Capture error IDs from multiple renders
     for (let i = 0; i < 3; i++) {
-      const { unmount } = render(
+      const { unmount } = renderWithProvider(
         <ErrorBoundary>
           <ThrowError shouldThrow={true} errorMessage={`Error ${i}`} />
         </ErrorBoundary>
@@ -174,7 +186,7 @@ describe('ErrorBoundary', () => {
     const originalEnv = process.env.NODE_ENV
     process.env.NODE_ENV = 'development'
 
-    render(
+    renderWithProvider(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} errorMessage="Development error" />
       </ErrorBoundary>
@@ -192,7 +204,7 @@ describe('ErrorBoundary', () => {
     const originalEnv = process.env.NODE_ENV
     process.env.NODE_ENV = 'production'
 
-    render(
+    renderWithProvider(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} errorMessage="Production error" />
       </ErrorBoundary>
@@ -206,7 +218,7 @@ describe('ErrorBoundary', () => {
   })
 
   it('should have proper accessibility attributes', () => {
-    render(
+    renderWithProvider(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>

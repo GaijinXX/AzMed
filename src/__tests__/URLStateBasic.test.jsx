@@ -76,11 +76,15 @@ vi.mock('../hooks/useTranslation', () => ({
   }))
 }))
 
+// Import the hook properly
+import { useURLState } from '../hooks/useURLState'
+
 // Simple test component that uses URL state
 function TestURLStateComponent() {
-  const { useURLState } = require('../hooks/useURLState')
-  
-  const { urlState, updateURL } = useURLState({
+  const {
+    urlState,
+    updateURL
+  } = useURLState({
     searchText: '',
     currentPage: 1,
     pageSize: 10,
@@ -135,8 +139,8 @@ describe('URL State Basic Integration', () => {
   })
 
   it('should initialize from URL parameters', async () => {
-    // Set URL with parameters
-    window.history.replaceState({}, '', '/?q=medicine&page=3&size=25&sort=name&dir=desc')
+    // Set URL with parameters using a valid sortable column
+    window.history.replaceState({}, '', '/?q=medicine&page=3&size=25&sort=product_name&dir=desc')
     
     const { getByTestId } = render(<TestURLStateComponent />)
     
@@ -144,7 +148,7 @@ describe('URL State Basic Integration', () => {
       expect(getByTestId('search-text')).toHaveTextContent('medicine')
       expect(getByTestId('current-page')).toHaveTextContent('3')
       expect(getByTestId('page-size')).toHaveTextContent('25')
-      expect(getByTestId('sort-column')).toHaveTextContent('name')
+      expect(getByTestId('sort-column')).toHaveTextContent('product_name')
       expect(getByTestId('sort-direction')).toHaveTextContent('desc')
     })
   })
@@ -169,6 +173,11 @@ describe('URL State Basic Integration', () => {
     
     // Update search
     getByTestId('update-search').click()
+    
+    // Wait for first update to complete
+    await waitFor(() => {
+      expect(getByTestId('search-text')).toHaveTextContent('test search')
+    })
     
     // Update page
     getByTestId('update-page').click()

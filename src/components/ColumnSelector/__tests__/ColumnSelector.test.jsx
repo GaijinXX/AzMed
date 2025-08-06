@@ -2,7 +2,19 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { LanguageProvider } from '../../../contexts/LanguageContext';
 import ColumnSelector from '../ColumnSelector';
+
+// Test wrapper with LanguageProvider
+const TestWrapper = ({ children }) => (
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
+);
+
+const renderWithProvider = (ui, options = {}) => {
+  return render(ui, { wrapper: TestWrapper, ...options });
+};
 
 // Mock columns for testing
 const mockColumns = [
@@ -31,7 +43,7 @@ describe('ColumnSelector', () => {
   });
 
   it('renders the toggle button with correct column count', () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -46,7 +58,7 @@ describe('ColumnSelector', () => {
   });
 
   it('opens dropdown when toggle button is clicked', async () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -62,7 +74,7 @@ describe('ColumnSelector', () => {
   });
 
   it('displays all columns with correct checked states', async () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -90,7 +102,7 @@ describe('ColumnSelector', () => {
   });
 
   it('shows required indicators for required columns', async () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -107,7 +119,7 @@ describe('ColumnSelector', () => {
   });
 
   it('calls onColumnToggle when checkbox is clicked', async () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -125,7 +137,7 @@ describe('ColumnSelector', () => {
   });
 
   it('shows all columns when "Show All" button is clicked', async () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -144,7 +156,7 @@ describe('ColumnSelector', () => {
   });
 
   it('hides optional columns when "Hide Optional" button is clicked', async () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -166,7 +178,7 @@ describe('ColumnSelector', () => {
   });
 
   it('closes dropdown when clicking outside', async () => {
-    render(
+    renderWithProvider(
       <div>
         <ColumnSelector
           columns={mockColumns}
@@ -191,7 +203,7 @@ describe('ColumnSelector', () => {
   });
 
   it('closes dropdown when Escape key is pressed', async () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -212,7 +224,7 @@ describe('ColumnSelector', () => {
   });
 
   it('is disabled when disabled prop is true', () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -227,7 +239,7 @@ describe('ColumnSelector', () => {
   });
 
   it('supports keyboard navigation', async () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -254,7 +266,7 @@ describe('ColumnSelector', () => {
   });
 
   it('updates screen reader announcement when column count changes', () => {
-    const { rerender } = render(
+    const { rerender } = renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}
@@ -278,7 +290,7 @@ describe('ColumnSelector', () => {
   });
 
   it('handles empty columns array gracefully', () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={[]}
         visibleColumns={{}}
@@ -291,7 +303,7 @@ describe('ColumnSelector', () => {
   });
 
   it('handles missing onColumnToggle prop gracefully', async () => {
-    render(
+    renderWithProvider(
       <ColumnSelector
         columns={mockColumns}
         visibleColumns={mockVisibleColumns}

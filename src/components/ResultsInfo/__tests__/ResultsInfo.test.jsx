@@ -1,19 +1,31 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
+import { LanguageProvider } from '../../../contexts/LanguageContext';
 import ResultsInfo from '../ResultsInfo';
+
+// Test wrapper with LanguageProvider
+const TestWrapper = ({ children }) => (
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
+);
+
+const renderWithProvider = (ui, options = {}) => {
+  return render(ui, { wrapper: TestWrapper, ...options });
+};
 
 describe('ResultsInfo', () => {
   describe('Loading state', () => {
     it('should display loading text when loading is true', () => {
-      render(<ResultsInfo loading={true} />);
+      renderWithProvider(<ResultsInfo loading={true} />);
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
   });
 
   describe('Zero results state', () => {
     it('should display no results message for search mode with zero results', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={0} 
           searchText="aspirin" 
@@ -25,7 +37,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should display no items message for browse mode with zero results', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={0} 
           searchText="" 
@@ -37,7 +49,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should handle whitespace-only search text as browse mode', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={0} 
           searchText="   " 
@@ -51,7 +63,7 @@ describe('ResultsInfo', () => {
 
   describe('Browse mode (no search)', () => {
     it('should display "Found 1 item" for single item', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={1} 
           searchText="" 
@@ -63,7 +75,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should display "Found X items" for multiple items', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={25} 
           searchText="" 
@@ -75,7 +87,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should display "Found X items" with formatted numbers for large counts', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={1500} 
           searchText="" 
@@ -89,7 +101,7 @@ describe('ResultsInfo', () => {
 
   describe('Search mode', () => {
     it('should display "Found 1 result" for single search result', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={1} 
           searchText="aspirin" 
@@ -101,7 +113,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should display "Found X results" for multiple search results', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={15} 
           searchText="paracetamol" 
@@ -113,7 +125,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should display "Found X results" with formatted numbers for large search results', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={2500} 
           searchText="vitamin" 
@@ -127,7 +139,7 @@ describe('ResultsInfo', () => {
 
   describe('Pagination range display', () => {
     it('should not show page range when total count is less than or equal to page size', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={8} 
           searchText="" 
@@ -139,7 +151,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should show page range when total count exceeds page size - first page', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={50} 
           searchText="" 
@@ -151,7 +163,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should show page range when total count exceeds page size - middle page', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={50} 
           searchText="" 
@@ -163,7 +175,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should show page range when total count exceeds page size - last page', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={47} 
           searchText="" 
@@ -175,7 +187,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should format large numbers in page range with commas', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={15000} 
           searchText="test" 
@@ -189,12 +201,12 @@ describe('ResultsInfo', () => {
 
   describe('Default props', () => {
     it('should handle missing props with defaults', () => {
-      render(<ResultsInfo />);
+      renderWithProvider(<ResultsInfo />);
       expect(screen.getByText('No items available')).toBeInTheDocument();
     });
 
     it('should use default values when props are undefined', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={undefined} 
           currentPage={undefined} 
@@ -208,7 +220,7 @@ describe('ResultsInfo', () => {
 
   describe('Edge cases', () => {
     it('should handle very large page numbers correctly', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={10000} 
           searchText="" 
@@ -220,7 +232,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should handle page size of 1', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={5} 
           searchText="" 
@@ -232,7 +244,7 @@ describe('ResultsInfo', () => {
     });
 
     it('should handle search text with special characters', () => {
-      render(
+      renderWithProvider(
         <ResultsInfo 
           totalCount={2} 
           searchText="test & search" 

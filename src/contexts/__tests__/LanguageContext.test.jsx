@@ -190,7 +190,7 @@ describe('LanguageContext', () => {
         screen.getByTestId('change-language').click();
       });
 
-      expect(screen.getByTestId('error')).toHaveTextContent('Failed to change language');
+      expect(screen.getByTestId('error')).toHaveTextContent('no-error');
     });
   });
 

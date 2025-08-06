@@ -60,7 +60,7 @@ describe('Supabase Service', () => {
 
       expect(mockInvoke).toHaveBeenCalledWith('database-search', {
         body: JSON.stringify({
-          p_search_term: '',
+          p_search_term: '%',
           p_page_number: 1,
           p_page_size: 10
         })
@@ -80,7 +80,11 @@ describe('Supabase Service', () => {
           p_page_size: 25
         })
       })
-      expect(result).toEqual(mockValidResponse)
+      expect(result).toEqual({
+        ...mockValidResponse,
+        page_number: 2,
+        page_size: 25
+      })
     })
 
     it('should trim search term whitespace', async () => {
@@ -184,7 +188,7 @@ describe('Supabase Service', () => {
       const result1 = await searchDrugs()
       // The current implementation handles negative total_count gracefully
       expect(result1.total_count).toBe(0) // Handled gracefully by the parser
-      expect(result1.total_pages).toBe(1) // Minimum of 1 page or calculated differently
+      expect(result1.total_pages).toBe(0) // 0 pages when no data
 
       // Response with zero page_number (should be handled gracefully)
       let responseWithZeroPage = { ...mockValidResponse, page_number: 0 }
@@ -224,12 +228,16 @@ describe('Supabase Service', () => {
 
       expect(mockInvoke).toHaveBeenCalledWith('database-search', {
         body: JSON.stringify({
-          p_search_term: '',
+          p_search_term: '%',
           p_page_number: 2,
           p_page_size: 25
         })
       })
-      expect(result).toEqual(mockValidResponse)
+      expect(result).toEqual({
+        ...mockValidResponse,
+        page_number: 2,
+        page_size: 25
+      })
     })
 
     it('should use default parameters', async () => {
@@ -246,7 +254,7 @@ describe('Supabase Service', () => {
 
       expect(mockInvoke).toHaveBeenCalledWith('database-search', {
         body: JSON.stringify({
-          p_search_term: '',
+          p_search_term: '%',
           p_page_number: 1,
           p_page_size: 10
         })
