@@ -1,0 +1,204 @@
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border: none;
+  background: none;
+  min-height: 40px;
+  position: relative;
+}
+
+.item:hover,
+.item.hovered {
+  background-color: var(--hover-bg-color, #f3f4f6);
+}
+
+.item.selected {
+  background-color: var(--selected-bg-color, #eff6ff);
+  border-left: 3px solid var(--primary-color, #3b82f6);
+}
+
+.item:focus {
+  outline: 2px solid var(--focus-color, #3b82f6);
+  outline-offset: -2px;
+  background-color: var(--selected-bg-color, #eff6ff);
+}
+
+.searchTerm {
+  flex: 1;
+  text-align: left;
+  font-size: 14px;
+  color: var(--text-color, #374151);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 8px;
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  opacity: 0;
+  visibility: hidden;
+  min-width: 24px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--danger-color, #ef4444);
+}
+
+.deleteButton.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.deleteButton:hover {
+  background-color: var(--danger-hover-bg, #fee2e2);
+  color: var(--danger-hover-color, #dc2626);
+}
+
+.deleteButton:focus {
+  outline: 2px solid var(--danger-color, #ef4444);
+  outline-offset: 2px;
+  opacity: 1;
+  visibility: visible;
+}
+
+.deleteButton:active {
+  background-color: var(--danger-active-bg, #fecaca);
+}
+
+.deleteIcon {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* Show delete button on hover for desktop */
+@media (hover: hover) and (pointer: fine) {
+  .item:hover .deleteButton {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .item {
+    padding: 12px 20px;
+    min-height: 48px;
+  }
+
+  .searchTerm {
+    font-size: 16px;
+    padding-right: 12px;
+  }
+
+  .deleteButton {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 8px;
+  }
+
+  .deleteIcon {
+    font-size: 18px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .item {
+    min-height: 48px;
+    padding: 12px 20px;
+  }
+
+  .deleteButton {
+    min-width: 44px;
+    min-height: 44px;
+    opacity: 0.7;
+    visibility: visible;
+  }
+
+  .deleteButton.visible {
+    opacity: 1;
+  }
+
+  .searchTerm {
+    font-size: 16px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .item.selected {
+    border-left-width: 4px;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .item.selected .searchTerm {
+    color: HighlightText;
+  }
+
+  .deleteButton {
+    border: 1px solid ButtonText;
+  }
+
+  .deleteButton:focus {
+    outline-width: 3px;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .item:hover,
+  .item.hovered {
+    background-color: var(--hover-bg-color-dark, #374151);
+  }
+
+  .item.selected {
+    background-color: var(--selected-bg-color-dark, #1e3a8a);
+    border-left-color: var(--primary-color-dark, #60a5fa);
+  }
+
+  .item:focus {
+    background-color: var(--selected-bg-color-dark, #1e3a8a);
+  }
+
+  .searchTerm {
+    color: var(--text-color-dark, #f9fafb);
+  }
+
+  .item.selected .searchTerm {
+    color: var(--text-color-dark, #f9fafb);
+  }
+
+  .deleteButton {
+    color: var(--danger-color-dark, #f87171);
+  }
+
+  .deleteButton:hover {
+    background-color: var(--danger-hover-bg-dark, #7f1d1d);
+    color: var(--danger-hover-color-dark, #fca5a5);
+  }
+
+  .deleteButton:active {
+    background-color: var(--danger-active-bg-dark, #991b1b);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .deleteButton {
+    transition: none;
+  }
+}

@@ -6,6 +6,15 @@
   position: relative;
 }
 
+.dropdownContainer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin-top: -2px; /* Overlap with input border */
+}
+
 .searchForm {
   width: 100%;
 }
@@ -163,6 +172,11 @@
     padding: 0 16px;
   }
 
+  .dropdownContainer {
+    left: 16px;
+    right: 16px;
+  }
+
   .searchInput {
     padding: 14px 20px;
     font-size: 16px;
@@ -191,6 +205,11 @@
   .searchContainer {
     margin: 0 auto 1rem;
     padding: 0 12px;
+  }
+
+  .dropdownContainer {
+    left: 12px;
+    right: 12px;
   }
 
   .inputWrapper {

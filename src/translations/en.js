@@ -156,5 +156,21 @@ export default {
     tooltip: 'Share this search with all current filters and settings',
     ariaLabel: 'Share current search state',
     copied: 'Copied!'
+  },
+  recentSearches: {
+    title: 'Recent Searches',
+    dropdown: {
+      label: 'Recent searches'
+    },
+    item: {
+      label: 'Recent search: {{searchTerm}}',
+      delete: {
+        label: 'Remove "{{searchTerm}}" from recent searches'
+      }
+    },
+    clearAll: {
+      text: 'Clear All',
+      label: 'Clear all recent searches'
+    }
   }
 };

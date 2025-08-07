@@ -156,5 +156,21 @@ export default {
     tooltip: 'Bu axtarışı bütün cari filtrlər və parametrlərlə paylaşın',
     ariaLabel: 'Cari axtarış vəziyyətini paylaş',
     copied: 'Kopyalandı!'
+  },
+  recentSearches: {
+    title: 'Son Axtarışlar',
+    dropdown: {
+      label: 'Son axtarışlar'
+    },
+    item: {
+      label: 'Son axtarış: {{searchTerm}}',
+      delete: {
+        label: '"{{searchTerm}}" son axtarışlardan sil'
+      }
+    },
+    clearAll: {
+      text: 'Hamısını Təmizlə',
+      label: 'Bütün son axtarışları təmizlə'
+    }
   }
 };

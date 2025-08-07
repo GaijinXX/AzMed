@@ -1,6 +1,8 @@
-import React, { useActionState, useDeferredValue, useTransition, useState } from 'react';
+import React, { useActionState, useDeferredValue, useTransition, useState, useRef, useEffect } from 'react';
 import { useCompilerOptimizations } from '../../hooks/useReact19Optimizations';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useRecentSearches } from '../../hooks/useRecentSearches';
+import RecentSearchesDropdown from '../RecentSearchesDropdown/RecentSearchesDropdown';
 import styles from './SearchBar.module.css';
 
 /**
@@ -26,6 +28,22 @@ function SearchBar({
   
   // Local state for immediate input updates
   const [inputValue, setInputValue] = useState(initialValue);
+  
+  // Dropdown visibility state
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  
+  // Refs for focus management
+  const inputRef = useRef(null);
+  const containerRef = useRef(null);
+  
+  // Recent searches hook
+  const {
+    recentSearches,
+    addRecentSearch,
+    removeRecentSearch,
+    clearAllRecentSearches,
+    hasRecentSearches
+  } = useRecentSearches();
 
   // Sync input value with initialValue prop when it changes (from URL state)
   React.useEffect(() => {
@@ -36,6 +54,14 @@ function SearchBar({
   const [searchState, searchAction, isSearchPending] = useActionState(
     async (prevState, formData) => {
       const searchText = formData.get('search')?.toString() || '';
+      
+      // Add to recent searches if not empty
+      if (searchText.trim()) {
+        addRecentSearch(searchText.trim());
+      }
+      
+      // Hide dropdown after search
+      setIsDropdownVisible(false);
       
       // Call the parent's search handler immediately (not in transition)
       // The parent handler will manage its own transitions and URL updates
@@ -69,24 +95,107 @@ function SearchBar({
     setInputValue(value);
   };
 
+  // Handle input focus - show dropdown if there are recent searches
+  const handleInputFocus = () => {
+    if (hasRecentSearches) {
+      setIsDropdownVisible(true);
+    }
+  };
+
+  // Handle input blur - hide dropdown with delay to allow for dropdown interactions
+  const handleInputBlur = (e) => {
+    // Check if the blur is moving to an element within our container
+    setTimeout(() => {
+      if (containerRef.current && !containerRef.current.contains(document.activeElement)) {
+        setIsDropdownVisible(false);
+      }
+    }, 150);
+  };
+
+  // Handle recent search selection
+  const handleSelectRecentSearch = (searchTerm) => {
+    setInputValue(searchTerm);
+    setIsDropdownVisible(false);
+    
+    // Trigger search immediately
+    if (onSearch) {
+      onSearch(searchTerm);
+    }
+    
+    // Focus back to input
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  // Handle recent search removal
+  const handleRemoveRecentSearch = (searchTerm) => {
+    removeRecentSearch(searchTerm);
+    // Keep dropdown open if there are still searches
+    if (recentSearches.length <= 1) {
+      setIsDropdownVisible(false);
+    }
+  };
+
+  // Handle clear all recent searches
+  const handleClearAllRecentSearches = () => {
+    clearAllRecentSearches();
+    setIsDropdownVisible(false);
+    // Focus back to input
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  // Handle dropdown close
+  const handleDropdownClose = () => {
+    setIsDropdownVisible(false);
+    // Focus back to input
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsDropdownVisible(false);
+      }
+    };
+
+    if (isDropdownVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isDropdownVisible]);
+
   const isLoading = isPending || isSearchPending;
 
   // Use translated placeholder if not provided
   const searchPlaceholder = placeholder || t('search.placeholder');
 
   return (
-    <div className={styles.searchContainer} role="search">
+    <div ref={containerRef} className={styles.searchContainer} role="search">
       <form action={searchAction} className={styles.searchForm} role="search">
         <label htmlFor="drug-search-input" className="visually-hidden">
           {t('search.ariaLabel')}
         </label>
         <div className={styles.inputWrapper}>
           <input
+            ref={inputRef}
             id="drug-search-input"
             name="search"
             type="search"
             value={inputValue}
             onChange={handleInputChange}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
             placeholder={searchPlaceholder}
             disabled={disabled || isLoading}
             className={`${styles.searchInput} ${isLoading ? styles.loading : ''}`}
@@ -95,7 +204,9 @@ function SearchBar({
             autoComplete="off"
             spellCheck="false"
             role="searchbox"
-            aria-expanded="false"
+            aria-expanded={isDropdownVisible}
+            aria-haspopup="listbox"
+            aria-owns={isDropdownVisible ? "recent-searches-dropdown" : undefined}
           />
           
           <button
@@ -119,6 +230,18 @@ function SearchBar({
           </button>
         </div>
       </form>
+      
+      {/* Recent Searches Dropdown */}
+      <div className={styles.dropdownContainer}>
+        <RecentSearchesDropdown
+          isVisible={isDropdownVisible}
+          recentSearches={recentSearches}
+          onSelectSearch={handleSelectRecentSearch}
+          onRemoveSearch={handleRemoveRecentSearch}
+          onClearAll={handleClearAllRecentSearches}
+          onClose={handleDropdownClose}
+        />
+      </div>
       
       {isLoading && (
         <div 
